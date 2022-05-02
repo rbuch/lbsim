@@ -67,15 +67,66 @@ protected:
 
 #ifdef DEBUG
 public:
-  static void printTree(TreeType* tree, std::string prefix = "")
+  static void printTree(TreeType* tree, int depth = 0, std::string prefix = "")
   {
     std::cout << prefix;
-    std::cout << tree->data.id << ": ";
+    std::cout << tree->data.id << " (" << tree->size << ", " << tree->getSplitDim(depth) << "): ";
     for (int i = 0; i < N; i++) std::cout << tree->data[i] << " ";
     std::cout << std::endl;
-    if (tree->left != nullptr) printTree(tree->left, prefix + "L  ");
-    if (tree->right != nullptr) printTree(tree->right, prefix + "R  ");
+    if (tree->left != nullptr) printTree(tree->left, depth + 1, prefix + "L  ");
+    if (tree->right != nullptr) printTree(tree->right, depth + 1, prefix + "R  ");
   }
+
+  static size_t countNodes(TreeType* tree)
+  {
+    size_t count = 0;
+    if (tree != nullptr) count++;
+    if (tree->left != nullptr) count += countNodes(tree->left);
+    if (tree->right != nullptr) count += countNodes(tree->right);
+
+    return count;
+  }
+
+  static bool checkTree(TreeType* tree)
+  {
+    std::vector<std::pair<TreeType*, bool>> accum;
+    return checkTreeHelper(tree, accum);
+  }
+
+private:
+  static bool checkTreeHelper(TreeType* tree,
+                              std::vector<std::pair<TreeType*, bool>>& accum)
+  {
+    bool valid = true;
+    for (int depth = 0; depth < accum.size(); depth++)
+    {
+      TreeType* node = accum[depth].first;
+      bool isLeft = accum[depth].second;
+      int splitDim = node->getSplitDim(depth);
+
+      valid &= (isLeft) ? tree->data[splitDim] < node->data[splitDim]
+        : tree->data[splitDim] >= node->data[splitDim];
+
+      if (!valid) return false;
+    }
+
+    if (tree->left != nullptr && valid)
+    {
+      accum.emplace_back(tree, true);
+      valid &= checkTreeHelper(tree->left, accum);
+      accum.pop_back();
+    }
+
+    if (tree->right != nullptr && valid)
+    {
+      accum.emplace_back(tree, false);
+      valid &= checkTreeHelper(tree->right, accum);
+      accum.pop_back();
+    }
+
+    return valid;
+  }
+
 #endif
 };
 

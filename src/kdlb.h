@@ -75,8 +75,10 @@ public:
       auto proc = *(T::findMinNormConstraints(tree, *objsIter, constraints));
 
       tree = T::remove(tree, proc);
+      //CkAssert(T::checkTree(tree);
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc, numConstraints);
+      //CkAssert(T::checkTree(tree);
     }
   }
 };
