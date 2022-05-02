@@ -63,6 +63,8 @@ protected:
     return sum;
   }
 
+  virtual int getSplitDim(int depth = 0) = 0;
+
 #ifdef DEBUG
 public:
   static void printTree(TreeType* tree, std::string prefix = "")
@@ -78,12 +80,14 @@ public:
 };
 
 template <typename Elem, int N=Elem::dimension>
-class KDNode : BaseKDNode<KDNode<Elem, N>, Elem>
+class KDNode : public BaseKDNode<KDNode<Elem, N>, Elem>
 {
   using base = BaseKDNode<KDNode<Elem, N>, Elem>;
   using kdt = KDNode*;
 public:
   KDNode(const Elem& key, const int numConstraints = 0) : base(key, numConstraints) {}
+
+  int getSplitDim(int depth = 0) { return depth % N; }
 
   static kdt insert(kdt t, const Elem& x, const int numConstraints = 0, unsigned int depth = 0)
   {
@@ -262,7 +266,7 @@ private:
 
 template <typename Elem, int N = Elem::dimension,
           typename Engine = std::default_random_engine>
-class RKDNode : BaseKDNode<RKDNode<Elem, N, Engine>, Elem>
+class RKDNode : public BaseKDNode<RKDNode<Elem, N, Engine>, Elem>
 {
   using base = BaseKDNode<RKDNode<Elem, N, Engine>, Elem>;
   using rkdt = RKDNode*;
@@ -277,6 +281,8 @@ private:
 
 public:
   RKDNode(const Elem& key, const int numConstraints) : base(key, numConstraints), discr(random(0, N - 1)) {}
+
+  int getSplitDim(int depth = 0) { return discr; }
 
   static rkdt insert(rkdt t, const Elem& x, const int numConstraints = 0)
   {
