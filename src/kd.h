@@ -450,6 +450,17 @@ public:
     return findMinNormHelper(t, x, nullptr, bestNorm, mins);
   }
 
+  template <typename T>
+  static Elem* findMinNormConstraints(rkdt t, const T& x,
+                                      const std::vector<KDFloatType>& constraints)
+  {
+    std::array<KDFloatType, N> mins = {0};
+    KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
+    Elem* result = findMinNormHelperC(t, x, 0, nullptr, bestNorm, mins, constraints);
+    CkAssertMsg(result != nullptr, "Cannot satisfy constraint!");
+    return result;
+  }
+
 private:
   template <typename T>
   static Elem* findMinNormHelper(rkdt t, const T& x, Elem* bestObj, KDFloatType& bestNorm,
@@ -477,6 +488,52 @@ private:
       if (base::calcNorm(x, minBounds) < bestNorm)
       {
         bestObj = findMinNormHelper(t->right, x, bestObj, bestNorm, minBounds);
+      }
+      minBounds[dim] = oldMin;
+    }
+
+    return bestObj;
+  }
+
+  template <typename T>
+  static Elem* findMinNormHelperC(rkdt t, const T& x, unsigned int depth, Elem* bestObj,
+                                  KDFloatType& bestNorm,
+                                  std::array<KDFloatType, N>& minBounds,
+                                  const std::vector<KDFloatType>& constraints)
+  {
+    const auto dim = t->discr;
+    const int numConstraints = constraints.size();
+
+    if (t->left != nullptr)
+    {
+      bestObj = findMinNormHelperC(t->left, x, depth + 1, bestObj, bestNorm, minBounds,
+                                   constraints);
+    }
+    if (t->norm < bestNorm)
+    {
+      const auto sum = base::addVecs(x, t->data);
+      const auto rootNorm = base::calcNorm(sum, numConstraints);
+      const auto constraintsMet =
+          std::equal(constraints.begin(), constraints.end(), sum.end() - numConstraints,
+                     [&](const KDFloatType& a, const KDFloatType& b) { return a >= b; });
+      if (rootNorm < bestNorm && constraintsMet)
+      {
+        bestObj = &(t->data);
+        bestNorm = rootNorm;
+      }
+    }
+    if (t->right != nullptr)
+    {
+      const auto oldMin = minBounds[dim];
+      minBounds[dim] = t->data[dim];
+      const auto constraintMet =
+          (dim >= N - numConstraints)
+              ? minBounds[dim] + x[dim] < constraints[dim - (N - numConstraints)]
+              : true;
+      if (constraintMet && base::calcNorm(x, minBounds, numConstraints) < bestNorm)
+      {
+        bestObj = findMinNormHelperC(t->right, x, depth + 1, bestObj, bestNorm, minBounds,
+                                     constraints);
       }
       minBounds[dim] = oldMin;
     }

@@ -328,6 +328,7 @@ int main(int argc, char* argv[])
   testLB<TreeStrategy::FuzzyORBScalar>(objs, procs, "fuzzyOrbScalar");
   std::vector<KDFloatType> constraints = {std::ceil(1.0 * numObjs / numProcs) + .1};
   testLB<TreeStrategy::KdConstraintLB, O, P>(objs, procs, "kdConstraint", constraints);
+  testLB<TreeStrategy::RKdConstraintLB, O, P>(objs, procs, "rkdConstraint", constraints);
 
   return 0;
 }

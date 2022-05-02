@@ -88,6 +88,13 @@ public:
   using BaseKdConstraintLB<O, P, S, KDNode<P>>::BaseKdConstraintLB;
 };
 
+template <typename O, typename P, typename S>
+class RKdConstraintLB : public BaseKdConstraintLB<O, P, S, RKDNode<P>>
+{
+public:
+  using BaseKdConstraintLB<O, P, S, RKDNode<P>>::BaseKdConstraintLB;
+};
+
 }  // namespace TreeStrategy
 
 #endif /* KDLB_H */
