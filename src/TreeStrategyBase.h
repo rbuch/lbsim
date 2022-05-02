@@ -1,8 +1,6 @@
 #ifndef TREESTRATEGYBASE_H
 #define TREESTRATEGYBASE_H
 
-#define NDEBUG
-
 #include <algorithm>
 #include <array>
 #include <cassert>

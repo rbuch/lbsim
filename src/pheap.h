@@ -1,8 +1,6 @@
 #ifndef PROC_HEAP_H
 #define PROC_HEAP_H
 
-#define NDEBUG
-
 #include <cassert>
 #include <vector>
 
