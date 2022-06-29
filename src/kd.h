@@ -25,7 +25,7 @@ protected:
 
   BaseKDNode(const Elem& key, const int numConstraints = 0) : data(key), norm(calcNorm(data, numConstraints)) {}
 
-  template <typename A, typename B = size_t, std::enable_if_t<std::is_integral<B>::value, bool> = true>
+  template <typename A, typename B = size_t, typename std::enable_if<std::is_integral<B>::value, bool>::type = true>
   static KDFloatType calcNorm(const A& x, const B numConstraints = 0)
   {
     KDFloatType sum = 0;
@@ -38,7 +38,7 @@ protected:
     return sum;
   }
 
-  template <typename A, typename B, typename C = size_t, std::enable_if_t<!std::is_integral<B>::value, bool> = true>
+  template <typename A, typename B, typename C = size_t, typename std::enable_if<!std::is_integral<B>::value, bool>::type = true>
   static KDFloatType calcNorm(const A& a, const B& b, const C numConstraints = 0)
   {
     KDFloatType sum = 0;
