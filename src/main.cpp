@@ -191,7 +191,7 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
     std::cout << load << " ";
     maxSum += load;
   }
-  std::cout << "(∑=" << maxSum << ")";
+  std::cout << "(∑=" << maxSum << ", max=" << *std::max_element(maxloads.begin(), maxloads.end()) << ")";
   std::cout << std::endl;
 
   double loadSum = 0;
