@@ -56,10 +56,13 @@ public:
 };
 
 std::vector<std::array<double, dimension + 1>> generate(const size_t numObjs,
-                                                        const size_t numProcs)
+                                                        const size_t numProcs,
+                                                        const int seed)
 {
   std::random_device rd;
   std::default_random_engine engine{rd()};
+  if (seed >= 0)
+    engine.seed(seed);
   std::exponential_distribution<double> expo(0.15);
   std::normal_distribution<double> normal(10, 3);
 
@@ -99,10 +102,12 @@ std::vector<std::array<double, dimension + 1>> generate(const size_t numObjs,
   return loads;
 }
 
-std::vector<std::vector<float>> generatePositions(const size_t numObjs)
+std::vector<std::vector<float>> generatePositions(const size_t numObjs, const int seed)
 {
   std::random_device rd;
   std::default_random_engine engine{rd()};
+  if (seed >= 0)
+    engine.seed(seed + 1);
   std::uniform_real_distribution<float> uniform(0, 100);
 
 
@@ -139,15 +144,14 @@ std::vector<std::vector<float>> generatePositions(const size_t numObjs)
   return positions;
 }
 
-void populate(std::vector<O>& objs,
-	      std::vector<P>& procs)
+void populate(std::vector<O>& objs, std::vector<P>& procs, const int seed)
 {
   const auto objsPerProc = objs.size() / (double)procs.size();
 
   std::vector<std::array<double, dimension + 1>> loads =
-      generate(objs.size(), procs.size());
+      generate(objs.size(), procs.size(), seed);
 
-  auto positions = generatePositions(objs.size());
+  auto positions = generatePositions(objs.size(), seed);
 
   for (int i = 0; i < objs.size(); i++)
   {
@@ -306,10 +310,11 @@ int main(int argc, char* argv[])
 
   const auto numProcs = (argc > 1) ? std::stoi(argv[1]) : 8192;
   const auto numObjs = (argc > 2) ? std::stoi(argv[2]) : 65536;
+  const int seed = (argc > 3) ? std::stoi(argv[3]) : -1;
 
   objs.resize(numObjs);
   procs.resize(numProcs);
-  populate(objs, procs);
+  populate(objs, procs, seed);
 
   std::cout << "Testing with " << numObjs << " objects and " << numProcs << " processors." << std::endl;
 
