@@ -40,9 +40,29 @@ class KdLB : public BaseKdLB<O, P, S, KDNode<P>>
 {
 };
 
+template <int Exp>
+class KdExpLB
+{
+public:
+  template <typename O, typename P, typename S>
+  class KdLB : public BaseKdLB<O, P, S, KDNode<P, Exp>>
+  {
+  };
+};
+
 template <typename O, typename P, typename S>
 class RKdLB : public BaseKdLB<O, P, S, RKDNode<P>>
 {
+};
+
+template <int Exp>
+class RKdExpLB
+{
+public:
+  template <typename O, typename P, typename S>
+  class RKdLB : public BaseKdLB<O, P, S, RKDNode<P, Exp>>
+  {
+  };
 };
 
 template <typename O, typename P, typename S, typename T>

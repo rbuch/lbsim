@@ -318,7 +318,11 @@ int main(int argc, char* argv[])
   testLB<TreeStrategy::Greedy>(objs, procs, "greedy");
   // testLB<TreeStrategy::GreedyNorm>(objs, procs, "greedynorm");
   // testLB<TreeStrategy::KdLB>(objs, procs, "kd");
-  testLB<TreeStrategy::RKdLB>(objs, procs, "rkd");
+  testLB<TreeStrategy::RKdExpLB<1>::RKdLB>(objs, procs, "rkd1");
+  testLB<TreeStrategy::RKdExpLB<2>::RKdLB>(objs, procs, "rkd2");
+  testLB<TreeStrategy::RKdExpLB<4>::RKdLB>(objs, procs, "rkd4");
+  testLB<TreeStrategy::RKdExpLB<8>::RKdLB>(objs, procs, "rkd8");
+  testLB<TreeStrategy::RKdExpLB<16>::RKdLB>(objs, procs, "rkd16");
   testLB<TreeStrategy::MetisLB>(objs, procs, "metis");
   //testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
   //testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");

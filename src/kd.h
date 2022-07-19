@@ -2,6 +2,7 @@
 #define KD_H
 
 #include <array>
+#include <cmath>
 #include <type_traits>
 #ifdef DEBUG
 #  include <iostream>
@@ -13,7 +14,7 @@
 
 using KDFloatType = double;
 
-template <typename TreeType, typename Elem, int N=Elem::dimension>
+template <typename TreeType, typename Elem, int Exp, int N = Elem::dimension>
 class BaseKDNode
 {
 protected:
@@ -25,28 +26,49 @@ protected:
 
   BaseKDNode(const Elem& key, const int numConstraints = 0) : data(key), norm(calcNorm(data, numConstraints)) {}
 
-  template <typename A, typename B = size_t, typename std::enable_if<std::is_integral<B>::value, bool>::type = true>
-  static KDFloatType calcNorm(const A& x, const B numConstraints = 0)
+  template <typename A>
+  static KDFloatType calcNorm(const A& x)
   {
     KDFloatType sum = 0;
-    for (int i = 0; i < N - numConstraints; i++)
+    for (int i = 0; i < N; i++)
     {
-      const auto element = x[i];
-      const auto elementSq = element * element;
-      sum += elementSq * elementSq;
+      sum += std::pow(x[i], Exp);
     }
     return sum;
   }
 
-  template <typename A, typename B, typename C = size_t, typename std::enable_if<!std::is_integral<B>::value, bool>::type = true>
-  static KDFloatType calcNorm(const A& a, const B& b, const C numConstraints = 0)
+  template <typename A, typename B,
+            typename std::enable_if<!std::is_integral<B>::value, bool>::type = true>
+  static KDFloatType calcNorm(const A& a, const B& b)
+  {
+    KDFloatType sum = 0;
+    for (int i = 0; i < N; i++)
+    {
+      sum += std::pow(a[i] + b[i], Exp);
+    }
+    return sum;
+  }
+
+  template <typename A, typename B = size_t,
+            typename std::enable_if<std::is_integral<B>::value, bool>::type = true>
+  static KDFloatType calcNorm(const A& x, const B numConstraints)
   {
     KDFloatType sum = 0;
     for (int i = 0; i < N - numConstraints; i++)
     {
-      const auto element = a[i] + b[i];
-      const auto elementSq = element * element;
-      sum += elementSq * elementSq;
+      sum += std::pow(x[i], Exp);
+    }
+    return sum;
+  }
+
+  template <typename A, typename B, typename C = size_t,
+            typename std::enable_if<!std::is_integral<B>::value, bool>::type = true>
+  static KDFloatType calcNorm(const A& a, const B& b, const C numConstraints)
+  {
+    KDFloatType sum = 0;
+    for (int i = 0; i < N - numConstraints; i++)
+    {
+      sum += std::pow(a[i] + b[i], Exp);
     }
     return sum;
   }
@@ -130,10 +152,10 @@ private:
 #endif
 };
 
-template <typename Elem, int N=Elem::dimension>
-class KDNode : public BaseKDNode<KDNode<Elem, N>, Elem>
+template <typename Elem, int Exp = 4, int N = Elem::dimension>
+class KDNode : public BaseKDNode<KDNode<Elem, Exp, N>, Elem, Exp>
 {
-  using base = BaseKDNode<KDNode<Elem, N>, Elem>;
+  using base = BaseKDNode<KDNode<Elem, Exp, N>, Elem, Exp>;
   using kdt = KDNode*;
 public:
   KDNode(const Elem& key, const int numConstraints = 0) : base(key, numConstraints) {}
@@ -315,11 +337,11 @@ private:
   }
 };
 
-template <typename Elem, int N = Elem::dimension,
+template <typename Elem, int Exp = 4, int N = Elem::dimension,
           typename Engine = std::default_random_engine>
-class RKDNode : public BaseKDNode<RKDNode<Elem, N, Engine>, Elem>
+class RKDNode : public BaseKDNode<RKDNode<Elem, Exp, N, Engine>, Elem, Exp>
 {
-  using base = BaseKDNode<RKDNode<Elem, N, Engine>, Elem>;
+  using base = BaseKDNode<RKDNode<Elem, Exp, N, Engine>, Elem, Exp>;
   using rkdt = RKDNode*;
 private:
   int discr;
