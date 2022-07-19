@@ -138,7 +138,7 @@ class KDNode : public BaseKDNode<KDNode<Elem, N>, Elem>
 public:
   KDNode(const Elem& key, const int numConstraints = 0) : base(key, numConstraints) {}
 
-  int getSplitDim(int depth = 0) { return depth % N; }
+  int getSplitDim(int depth = 0) override { return depth % N; }
 
   static kdt insert(kdt t, const Elem& x, const int numConstraints = 0, unsigned int depth = 0)
   {
@@ -333,7 +333,7 @@ private:
 public:
   RKDNode(const Elem& key, const int numConstraints) : base(key, numConstraints), discr(random(0, N - 1)) {}
 
-  int getSplitDim(int depth = 0) { return discr; }
+  int getSplitDim(int depth = 0) override { return discr; }
 
   static rkdt insert(rkdt t, const Elem& x, const int numConstraints = 0)
   {
