@@ -328,6 +328,7 @@ int main(int argc, char* argv[])
   testLB<TreeStrategy::RKdExpLB<4>::RKdLB>(objs, procs, "rkd4");
   testLB<TreeStrategy::RKdExpLB<8>::RKdLB>(objs, procs, "rkd8");
   testLB<TreeStrategy::RKdExpLB<16>::RKdLB>(objs, procs, "rkd16");
+  testLB<TreeStrategy::RKdExpLB<100>::RKdLB>(objs, procs, "rkdInf");
   testLB<TreeStrategy::MetisLB>(objs, procs, "metis");
   //testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
   //testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");

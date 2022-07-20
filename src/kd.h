@@ -1,6 +1,7 @@
 #ifndef KD_H
 #define KD_H
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <type_traits>
@@ -29,48 +30,86 @@ protected:
   template <typename A>
   static KDFloatType calcNorm(const A& x)
   {
-    KDFloatType sum = 0;
-    for (int i = 0; i < N; i++)
+    KDFloatType norm = 0;
+    if constexpr (Exp >= 32)
     {
-      sum += std::pow(x[i], Exp);
+      norm = *std::max_element(x.begin(), x.end());
     }
-    return sum;
+    else
+    {
+      for (int i = 0; i < N; i++)
+      {
+        norm += std::pow(x[i], Exp);
+      }
+    }
+    return norm;
   }
 
   template <typename A, typename B,
             typename std::enable_if<!std::is_integral<B>::value, bool>::type = true>
   static KDFloatType calcNorm(const A& a, const B& b)
   {
-    KDFloatType sum = 0;
-    for (int i = 0; i < N; i++)
+    KDFloatType norm = 0;
+    if constexpr (Exp >= 32)
     {
-      sum += std::pow(a[i] + b[i], Exp);
+      std::array<KDFloatType, N> sum;
+      for (int i = 0; i < N; i++)
+      {
+        sum[i] = a[i] + b[i];
+      }
+      norm = *std::max_element(sum.begin(), sum.end());
     }
-    return sum;
+    else
+    {
+      for (int i = 0; i < N; i++)
+      {
+        norm += std::pow(a[i] + b[i], Exp);
+      }
+    }
+    return norm;
   }
 
   template <typename A, typename B = size_t,
             typename std::enable_if<std::is_integral<B>::value, bool>::type = true>
   static KDFloatType calcNorm(const A& x, const B numConstraints)
   {
-    KDFloatType sum = 0;
-    for (int i = 0; i < N - numConstraints; i++)
+    KDFloatType norm = 0;
+    if constexpr (Exp >= 32)
     {
-      sum += std::pow(x[i], Exp);
+      norm = *std::max_element(x.begin(), x.end() - numConstraints);
     }
-    return sum;
+    else
+    {
+      for (int i = 0; i < N - numConstraints; i++)
+      {
+        norm += std::pow(x[i], Exp);
+      }
+    }
+    return norm;
   }
 
   template <typename A, typename B, typename C = size_t,
             typename std::enable_if<!std::is_integral<B>::value, bool>::type = true>
   static KDFloatType calcNorm(const A& a, const B& b, const C numConstraints)
   {
-    KDFloatType sum = 0;
-    for (int i = 0; i < N - numConstraints; i++)
+    KDFloatType norm = 0;
+    if constexpr (Exp >= 32)
     {
-      sum += std::pow(a[i] + b[i], Exp);
+      std::array<KDFloatType, N> sum;
+      for (int i = 0; i < N; i++)
+      {
+        sum[i] = a[i] + b[i];
+      }
+      norm = *std::max_element(sum.begin(), sum.end() - numConstraints);
     }
-    return sum;
+    else
+    {
+      for (int i = 0; i < N - numConstraints; i++)
+      {
+        norm += std::pow(a[i] + b[i], Exp);
+      }
+    }
+    return norm;
   }
 
   template <typename A, typename B>

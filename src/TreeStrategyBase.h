@@ -189,6 +189,11 @@ class Proc
 
   void resetLoad();              // sets processor loads to background loads
   bool operator==(const Proc& element) const;
+
+  LoadFloatType* begin();
+  LoadFloatType* begin() const;
+  LoadFloatType* end();
+  LoadFloatType* end() const;
 };
 
 template <int N>
@@ -262,6 +267,11 @@ class Proc<N, false, multi>
   }
 
   bool operator==(const Proc& element) const { return id == element.id; };
+
+  LoadFloatType* begin() { return this->load.begin(); }
+  const LoadFloatType* begin() const { return this->load.begin(); }
+  LoadFloatType* end() { return this->load.end(); }
+  const LoadFloatType* end() const { return this->load.end(); }
 };
 
 template <>
@@ -357,6 +367,11 @@ class Proc<N, true, multi>
   }
 
   bool operator==(const Proc& element) const { return id == element.id; };
+
+  LoadFloatType* begin() { return this->load.begin(); }
+  const LoadFloatType* begin() const { return this->load.begin(); }
+  LoadFloatType* end() { return this->load.end(); }
+  const LoadFloatType* end() const { return this->load.end(); }
 };
 
 template <>
