@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import matplotlib.pyplot as plt
+
 import sys
 
 lbMap = {}
@@ -21,4 +23,14 @@ for filename in sys.argv[1:]:
                     lbMap[currentLB].append(ratio)
 
 print(lbMap)
-            
+
+plt.style.use('seaborn-colorblind')
+fig, ax = plt.subplots()
+ax.set_title('LB Performance')
+ax.set_ylabel('Max/Avg Ratio')
+
+labels = [key for key in lbMap][1:]
+data = [lbMap[key] for key in lbMap][1:]
+
+ax.boxplot(data, labels=labels)
+plt.show()
