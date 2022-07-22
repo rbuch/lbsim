@@ -180,6 +180,8 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
   std::cout << "Elapsed time for " << lb_name << ": "  << elapsed_seconds.count() << std::endl;
   std::array<double, dimension> maxloads = {0};
   std::array<double, dimension> totalloads = {0};
+
+  double maxDimensionSum = 0;
   for (const auto& loadVec : sol.loads)
   {
     for (int i = 0; i < maxloads.size(); i++)
@@ -187,6 +189,8 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
       maxloads[i] = std::max(maxloads[i], loadVec[i]);
       totalloads[i] += loadVec[i];
     }
+
+    maxDimensionSum += *std::max_element(loadVec.begin(), loadVec.end());
   }
   double maxSum = 0;
   std::cout << "Maxloads: ";
@@ -205,7 +209,9 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
     std::cout << maxloads[i] / (totalloads[i] / procs.size()) << " ";
     loadSum += totalloads[i];
   }
-  std::cout << "(∑=" << maxSum / (loadSum / procs.size())  << ")";
+  std::cout << "(∑=" << maxSum / (loadSum / procs.size()) << ", max="
+            << *std::max_element(maxloads.begin(), maxloads.end()) / (maxDimensionSum / procs.size())
+            << ")";
   std::cout << std::endl << std::endl;
 }
 
