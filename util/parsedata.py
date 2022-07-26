@@ -10,12 +10,15 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-i", "--inputdir", help="Root processor directory)", required=True)
-parser.add_argument("-o", "--output", help="Graph output filename")
+parser.add_argument("-o", "--output", help="Graph output filename stem")
 
 args = parser.parse_args()
 
 
-objToResults = {}
+MAX = 'Maximum'
+TOTAL = 'Total'
+
+objToResults = {MAX: {}, TOTAL: {}}
 
 currentLB = None
 
@@ -30,10 +33,9 @@ numPes = int(p.stem)
 
 objtiers = sorted([x for x in p.iterdir()])
 
-
 for objtier in objtiers:
     numObjs = int(objtier.stem)
-    lbMap = {}
+    lbMap = {MAX: {}, TOTAL: {}}
     for filename in objtier.iterdir():
         with open(filename, 'r') as f:
             data = f.readlines()
@@ -41,15 +43,20 @@ for objtier in objtiers:
                 if 'time' in line:
                     currentLB = line.split(':')[0].split()[-1]
                 elif 'Ratio' in line:
-                    ratio = float(line.strip().split('=')[1][:-1])
+                    ratioString = line.strip().split('(')[1][:-1]
+                    totalRatio, maxRatio = [float(x.split('=')[1]) for x in
+                                       ratioString.split(',')]
                     assert(currentLB is not None)
-                    if currentLB not in lbMap:
-                        lbMap[currentLB] = [ratio]
+                    if currentLB not in lbMap[MAX]:
+                        lbMap[MAX][currentLB] = [maxRatio]
+                        lbMap[TOTAL][currentLB] = [totalRatio]
                     else:
-                        lbMap[currentLB].append(ratio)
-    objToResults[numObjs] = lbMap
+                        lbMap[MAX][currentLB].append(maxRatio)
+                        lbMap[TOTAL][currentLB].append(totalRatio)
+    objToResults[MAX][numObjs] = lbMap[MAX]
+    objToResults[TOTAL][numObjs] = lbMap[TOTAL]
 
-print(objToResults)
+#print(objToResults)
 
 # trigger core fonts for PDF backend
 plt.rcParams["pdf.use14corefonts"] = True
@@ -61,22 +68,26 @@ plt.rcParams.update({
 
 plt.style.use('seaborn-colorblind')
 #fig, axs = plt.subplots(len(objToResults), sharey=True)
-fig, axs = plt.subplots(len(objToResults))
 
+for kind in objToResults:
+    dataset = objToResults[kind]
 
-for numObjs, i in zip(objToResults, range(len(objToResults))):
-    lbMap = objToResults[numObjs]
-    ax = axs[i]
-    ax.set_title('LB Performance ({} PEs, {} Objs)'.format(numPes, numObjs))
-    ax.set_ylabel('Max/Avg Ratio')
-    labels = [key for key in lbMap][1:]
-    labels = list(map(lambda x: '$k$d '+x[3:]+"-norm" if 'rkd' in x else x, labels))
-    labels = list(map(lambda x: x.replace('Inf', '$\\infty$'), labels))
-    data = [lbMap[key] for key in lbMap][1:]
+    fig, axs = plt.subplots(len(dataset))
 
-    ax.boxplot(data, labels=labels, whis=(0,100))
+    for numObjs, i in zip(dataset, range(len(dataset))):
+        lbMap = dataset[numObjs]
+        ax = axs[i]
+        ax.set_title('LB Performance ({}, {} PEs, {} Objs)'.format(kind, numPes, numObjs))
+        ax.set_ylabel('Max/Avg Ratio')
+        labels = [key for key in lbMap][1:]
+        labels = list(map(lambda x: '$k$d '+x[3:]+"-norm" if 'rkd' in x else x, labels))
+        labels = list(map(lambda x: x.replace('Inf', '$\\infty$'), labels))
+        data = [lbMap[key] for key in lbMap][1:]
 
-plt.show()
+        ax.boxplot(data, labels=labels, whis=(0,100))
 
-#fig.tight_layout()
-fig.savefig(args.output, format='pdf', bbox_inches='tight')
+    #plt.show()
+
+    #fig.tight_layout()
+    fig.set_size_inches(9, len(dataset) * 3.6)
+    fig.savefig("{}-{}.pdf".format(args.output, kind), format='pdf', bbox_inches='tight')
