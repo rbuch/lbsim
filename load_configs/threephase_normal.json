@@ -1,0 +1,11 @@
+{
+    "phases":
+    [
+        {"normal": {"mean": 10.0, "stddev": 3.0}},
+        {"normal": {"mean": 10.0, "stddev": 3.0}},
+        {"normal": {"mean": 10.0, "stddev": 3.0}}
+    ],
+    "dataSize": [ {"normal": {"mean": 1000000, "stddev": 100}} ],
+    "commSizes": [ 0, 0 ]
+
+}

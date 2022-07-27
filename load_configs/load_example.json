@@ -1,0 +1,30 @@
+{
+    "phases":
+    [
+        {"constant": { "value": 1.0 }},
+        {"linear": { "base": 0.5, "increment": 0.05 , "shift": 1 }},
+        {
+            "nestedProb": {
+                "ratio": [1, 1],
+                "dists": [
+                    {"normal": {"mean": 1.0, "stddev": 0.1}},
+                    {"normal": {"mean": 5.0, "stddev": 0.1}}
+                ]
+            }
+        },
+        {
+            "nestedBlock": {
+                "ratio": [1, 1, 1],
+                "dists": [
+                    {"constant": {"value": 1.0}},
+                    {"constant": {"value": 2.0}},
+                    {"constant": {"value": 3.0}}
+                ]
+            }
+        }
+
+    ],
+    "dataSize": [ {"normal": {"mean": 1000000, "stddev": 100}} ],
+    "commSizes": [ 0, 0, 1024, 0 ]
+
+}
