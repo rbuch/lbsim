@@ -21,6 +21,8 @@ constexpr void CkAssertMsg(bool cond, const char* msg)
 }
 
 #include "vt_parse.h"
+#include "generate.h"
+
 #include "TreeStrategyBase.h"
 #include "greedy.h"
 #include "kdlb.h"
@@ -230,7 +232,7 @@ void testLBHelper(size_t dim, const std::vector<std::vector<double>>& objLoads,
     for (int i = 0; i < objs.size(); i++)
     {
       // TODO: Set the correct oldPe
-      objs[i].populate(i, objLoads[i].data(), i / bgLoads.size());
+      objs[i].populate(i, objLoads[i].data(), (int)(((float)i / objs.size())  * bgLoads.size()));
     }
     std::vector<ProcType> procs(bgLoads.size());
     for (int i = 0; i < procs.size(); i++)
@@ -241,12 +243,16 @@ void testLBHelper(size_t dim, const std::vector<std::vector<double>>& objLoads,
 
     if (!testScalar)
     {
-      testLB<TreeStrategy::Dummy, ObjType, ProcType>(objs, procs, "dummy");
-      testLB<TreeStrategy::Random, ObjType, ProcType>(objs, procs, "random");
+      //testLB<TreeStrategy::Dummy, ObjType, ProcType>(objs, procs, "dummy");
+      //testLB<TreeStrategy::Random, ObjType, ProcType>(objs, procs, "random");
       testLB<TreeStrategy::Greedy, ObjType, ProcType>(objs, procs, "greedy");
       // testLB<TreeStrategy::GreedyNorm>(objs, procs, "greedynorm");
       // testLB<TreeStrategy::KdLB>(objs, procs, "kd");
-      testLB<TreeStrategy::RKdLB, ObjType, ProcType>(objs, procs, "rkd");
+      testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2");
+      testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4");
+      testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs, "rkd8");
+      testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs, procs, "rkd16");
+      testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType, ProcType>(objs, procs, "rkdInf");
       testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis");
       // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
       // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
@@ -262,7 +268,7 @@ void testLBHelper(size_t dim, const std::vector<std::vector<double>>& objLoads,
   }
 }
 
-void testVtLogs(std::vector<std::vector<double>>& objLoads, std::vector<double>& bgLoads)
+void testFromLogs(std::vector<std::vector<double>>& objLoads, std::vector<double>& bgLoads)
 {
   assert(!objLoads.empty());
 
@@ -310,7 +316,7 @@ int main(int argc, char* argv[])
       bgloads.push_back(bgload);
     }
 
-    testVtLogs(loads, bgloads);
+    testFromLogs(loads, bgloads);
     return 0;
   }
 
@@ -320,7 +326,20 @@ int main(int argc, char* argv[])
 
   objs.resize(numObjs);
   procs.resize(numProcs);
-  populate(objs, procs, seed);
+
+  it = std::find(argv, argv + argc, (std::string)"-json");
+  if (it != argv + argc)
+  {
+    std::vector<std::vector<double>> objs;
+    conf::loadFile(*(++it), objs, numObjs, seed);
+    std::vector<double> bgLoads(numProcs, 0);
+    testFromLogs(objs, bgLoads);
+    return 0;
+  }
+  else
+  {
+    populate(objs, procs, seed);
+  }
 
   std::cout << "Testing with " << numObjs << " objects and " << numProcs << " processors." << std::endl;
 
