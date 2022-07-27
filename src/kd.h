@@ -20,10 +20,10 @@ class BaseKDNode
 {
 protected:
   Elem data;
-  unsigned int size = 1;
   TreeType* left = nullptr;
   TreeType* right = nullptr;
   KDFloatType norm;
+  unsigned int size = 1;
 
   BaseKDNode(const Elem& key, const int numConstraints = 0) : data(key), norm(calcNorm(data, numConstraints)) {}
 
@@ -585,8 +585,6 @@ private:
   static Elem* findMinNormHelper(rkdt t, const T& x, Elem* bestObj, KDFloatType& bestNorm,
                                  std::array<KDFloatType, N>& minBounds)
   {
-    const auto dim = t->discr;
-
     if (t->left != nullptr)
     {
       bestObj = findMinNormHelper(t->left, x, bestObj, bestNorm, minBounds);
@@ -602,6 +600,7 @@ private:
     }
     if (t->right != nullptr)
     {
+      const auto dim = t->discr;
       const auto oldMin = minBounds[dim];
       minBounds[dim] = t->data[dim];
       if (base::calcNorm(x, minBounds) < bestNorm)
