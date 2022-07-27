@@ -205,8 +205,8 @@ struct proc_N_data
 };
 struct proc_1_data
 {
-  LoadFloatType load = 0;
-  LoadFloatType bgload = 0;
+  std::array<LoadFloatType, 1> load = {0};
+  std::array<LoadFloatType, 1> bgload = {0};
 };
 
 // --------- Proc rateAware=false specializations ---------
@@ -278,12 +278,12 @@ template <>
 void Proc<1, false>::populate(int _id, LoadFloatType* _bgload, LoadFloatType* _speed)
 {
   id = _id;
-  this->bgload = *_bgload;
+  this->bgload[0] = *_bgload;
 }
 template <>
 LoadFloatType Proc<1, false>::getLoad() const
 {
-  return this->load;
+  return this->load[0];
 }
 template <>
 LoadFloatType Proc<1, false>::getLoad(int) const
@@ -293,12 +293,12 @@ LoadFloatType Proc<1, false>::getLoad(int) const
 template <>
 void Proc<1, false>::assign(const Obj<1>* o)
 {
-  this->load += o->load;
+  this->load[0] += o->load;
 }
 template <>
 void Proc<1, false>::unassign(const Obj<1>* o)
 {
-  this->load -= o->load;
+  this->load[0] -= o->load;
 }
 template <>
 void Proc<1, false>::resetLoad()
@@ -378,13 +378,13 @@ template <>
 void Proc<1, true>::populate(int _id, LoadFloatType* _bgload, LoadFloatType* _speed)
 {
   id = _id;
-  this->bgload = *_bgload;
+  this->bgload[0] = *_bgload;
   speed[0] = _speed[0];
 }
 template <>
 LoadFloatType Proc<1, true>::getLoad() const
 {
-  return this->load;
+  return this->load[0];
 }
 template <>
 LoadFloatType Proc<1, true>::getLoad(int) const
@@ -399,12 +399,12 @@ LoadFloatType Proc<1, true>::operator[](size_t) const
 template <>
 void Proc<1, true>::assign(const Obj<1>* o)
 {
-  this->load += (o->load / speed[0]);
+  this->load[0] += (o->load / speed[0]);
 }
 template <>
 void Proc<1, true>::unassign(const Obj<1>* o)
 {
-  this->load -= (o->load / speed[0]);
+  this->load[0] -= (o->load / speed[0]);
 }
 template <>
 void Proc<1, true>::resetLoad()
