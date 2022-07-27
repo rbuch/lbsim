@@ -21,7 +21,7 @@ constexpr void CkAssertMsg(bool cond, const char* msg)
 }
 
 #include "vt_parse.h"
-#include "generate.h"
+#include "load_config.h"
 
 #include "TreeStrategyBase.h"
 #include "greedy.h"
