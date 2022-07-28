@@ -12,15 +12,15 @@ using json = nlohmann::json;
 
 class Obj
 {
-    std::vector<double> loadVec;
+    std::vector<LoadFloatType> loadVec;
     int oldPe;
     int id;
 
-    Obj(std::vector<double> loadVec, int oldPe, int id) : loadVec(loadVec), oldPe(oldPe), id(id) {}
+    Obj(std::vector<LoadFloatType> loadVec, int oldPe, int id) : loadVec(loadVec), oldPe(oldPe), id(id) {}
 };
 
-void loadFile(std::string filename, std::vector<std::vector<double>>& loads,
-              double& bgload)
+void loadFile(std::string filename, std::vector<std::vector<LoadFloatType>>& loads,
+              LoadFloatType& bgload)
 {
   std::ifstream file(filename);
   json data;
@@ -33,17 +33,17 @@ void loadFile(std::string filename, std::vector<std::vector<double>>& loads,
     if (task["entity"]["migratable"].get<bool>())
     {
       auto subphases = task["subphases"].get<std::vector<json>>();
-      std::vector<double> load;
-      load.push_back(task["time"].get<double>());
+      std::vector<LoadFloatType> load;
+      load.push_back(task["time"].get<LoadFloatType>());
       for (const auto& subphase : subphases)
       {
-        load.push_back(subphase["time"].get<double>());
+        load.push_back(subphase["time"].get<LoadFloatType>());
       }
       loads.push_back(load);
     }
     else
     {
-      bgload += task["time"].get<double>();
+      bgload += task["time"].get<LoadFloatType>();
     }
   }
 }

@@ -40,7 +40,7 @@ class Solution
 {
   static constexpr auto dimension = O::dimension;
 public:
-  std::vector<std::array<double, dimension>> loads;
+  std::vector<std::array<LoadFloatType, dimension>> loads;
 
   Solution(size_t numProcs) { loads.resize(numProcs); }
 
@@ -57,7 +57,7 @@ public:
   inline void assign(const O& o, P& p) { assign(&o, &p); }
 };
 
-std::vector<std::array<double, dimension + 1>> generate(const size_t numObjs,
+std::vector<std::array<LoadFloatType, dimension + 1>> generate(const size_t numObjs,
                                                         const size_t numProcs,
                                                         const int seed)
 {
@@ -65,25 +65,25 @@ std::vector<std::array<double, dimension + 1>> generate(const size_t numObjs,
   std::default_random_engine engine{rd()};
   if (seed >= 0)
     engine.seed(seed);
-  std::exponential_distribution<double> expo(0.15);
-  std::normal_distribution<double> normal(10, 3);
+  std::exponential_distribution<LoadFloatType> expo(0.15);
+  std::normal_distribution<LoadFloatType> normal(10, 3);
 
-  std::vector<std::array<double, dimension + 1>> loads;
+  std::vector<std::array<LoadFloatType, dimension + 1>> loads;
   loads.reserve(numObjs);
   for (size_t i = 0; i < numObjs; i++)
   {
-    std::array<double, dimension + 1> load = {0};
+    std::array<LoadFloatType, dimension + 1> load = {0};
     for (int j = 1; j < load.size(); j++)
     {
       if (j & 1)
         load[j] = expo(engine);
       else
-        load[j] = std::max(0.0, normal(engine));
+        load[j] = std::max((LoadFloatType)0.0, normal(engine));
       load[0] += load[j];
     }
     loads.push_back(load);
   }
-  std::array<double, dimension> min = {std::numeric_limits<double>::max()}, max = {0},
+  std::array<LoadFloatType, dimension> min = {std::numeric_limits<LoadFloatType>::max()}, max = {0},
                                 sum = {0};
   for (const auto& load : loads)
   {
@@ -148,9 +148,9 @@ std::vector<std::vector<float>> generatePositions(const size_t numObjs, const in
 
 void populate(std::vector<O>& objs, std::vector<P>& procs, const int seed)
 {
-  const auto objsPerProc = objs.size() / (double)procs.size();
+  const LoadFloatType objsPerProc = objs.size() / (double)procs.size();
 
-  std::vector<std::array<double, dimension + 1>> loads =
+  std::vector<std::array<LoadFloatType, dimension + 1>> loads =
       generate(objs.size(), procs.size(), seed);
 
   auto positions = generatePositions(objs.size(), seed);
@@ -160,7 +160,7 @@ void populate(std::vector<O>& objs, std::vector<P>& procs, const int seed)
     ptr(objs[i])->populate(i, loads[i].data(), i / objsPerProc);
     ptr(objs[i])->setPosition(positions[i]);
   }
-  std::array<double, dimension + 1> empty = {0};
+  std::array<LoadFloatType, dimension + 1> empty = {0};
   for (int i = 0; i < procs.size(); i++)
   {
     ptr(procs[i])->populate(i, empty.data(), nullptr);
@@ -180,10 +180,10 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
   std::chrono::duration<double> elapsed_seconds = end-start;
 
   std::cout << "Elapsed time for " << lb_name << ": "  << elapsed_seconds.count() << std::endl;
-  std::array<double, dimension> maxloads = {0};
-  std::array<double, dimension> totalloads = {0};
+  std::array<LoadFloatType, dimension> maxloads = {0};
+  std::array<LoadFloatType, dimension> totalloads = {0};
 
-  double maxDimensionSum = 0;
+  LoadFloatType maxDimensionSum = 0;
   for (const auto& loadVec : sol.loads)
   {
     for (int i = 0; i < maxloads.size(); i++)
@@ -194,7 +194,7 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
 
     maxDimensionSum += *std::max_element(loadVec.begin(), loadVec.end());
   }
-  double maxSum = 0;
+  LoadFloatType maxSum = 0;
   std::cout << "Maxloads: ";
   for (const auto& load : maxloads)
   {
@@ -204,7 +204,7 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
   std::cout << "(∑=" << maxSum << ", max=" << *std::max_element(maxloads.begin(), maxloads.end()) << ")";
   std::cout << std::endl;
 
-  double loadSum = 0;
+  LoadFloatType loadSum = 0;
   std::cout << "Ratio: ";
   for (int i = 0; i < dimension; i++)
   {
@@ -218,8 +218,8 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
 }
 
 template <int N>
-void testLBHelper(size_t dim, const std::vector<std::vector<double>>& objLoads,
-                  const std::vector<double>& bgLoads, const bool testScalar = false)
+void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& objLoads,
+                  const std::vector<LoadFloatType>& bgLoads, const bool testScalar = false)
 {
   if constexpr (N == 0)
     assert(false);
@@ -237,7 +237,7 @@ void testLBHelper(size_t dim, const std::vector<std::vector<double>>& objLoads,
     std::vector<ProcType> procs(bgLoads.size());
     for (int i = 0; i < procs.size(); i++)
     {
-      double curBgLoad = 0;//bgLoads[i] / dim;
+      LoadFloatType curBgLoad = 0;//bgLoads[i] / dim;
       procs[i].populate(i, &curBgLoad, nullptr);
     }
 
@@ -268,11 +268,11 @@ void testLBHelper(size_t dim, const std::vector<std::vector<double>>& objLoads,
   }
 }
 
-void testFromLogs(std::vector<std::vector<double>>& objLoads, std::vector<double>& bgLoads)
+void testFromLogs(std::vector<std::vector<LoadFloatType>>& objLoads, std::vector<LoadFloatType>& bgLoads)
 {
   assert(!objLoads.empty());
 
-  std::vector<double> totalLoad(objLoads[0].size());
+  std::vector<LoadFloatType> totalLoad(objLoads[0].size());
 
   const auto objDimension = objLoads[0].size() - 1;
   for (const auto& loadVec : objLoads)
@@ -305,13 +305,13 @@ int main(int argc, char* argv[])
   char** it = std::find(argv, argv + argc, (std::string)"-vt");
   if (it != argv + argc)
   {
-    std::vector<std::vector<double>> loads;
-    std::vector<double> bgloads;
+    std::vector<std::vector<LoadFloatType>> loads;
+    std::vector<LoadFloatType> bgloads;
     // Read vt log files
     while (++it != argv + argc)
     {
       std::cout << "Loading " << *it << std::endl;
-      double bgload;
+      LoadFloatType bgload;
       vt::loadFile(*it, loads, bgload);
       bgloads.push_back(bgload);
     }
@@ -330,9 +330,9 @@ int main(int argc, char* argv[])
   it = std::find(argv, argv + argc, (std::string)"-json");
   if (it != argv + argc)
   {
-    std::vector<std::vector<double>> objs;
+    std::vector<std::vector<LoadFloatType>> objs;
     conf::loadFile(*(++it), objs, numObjs, seed);
-    std::vector<double> bgLoads(numProcs, 0);
+    std::vector<LoadFloatType> bgLoads(numProcs, 0);
     testFromLogs(objs, bgLoads);
     return 0;
   }

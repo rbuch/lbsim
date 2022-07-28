@@ -37,7 +37,7 @@ public:
     // mapping of objs to partitions
     std::vector<idx_t> part(nvtxs);
 
-    std::array<double, O::dimension> maxLoad;
+    std::array<LoadFloatType, O::dimension> maxLoad;
     /** the object load is normalized to an integer between 0 and 1024 */
     for (const auto& obj : objs)
     {
