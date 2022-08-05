@@ -570,6 +570,14 @@ public:
   }
 
   template <typename T>
+  static Elem* findMinNormNoRecurse(rkdt t, const T& x)
+  {
+    std::array<KDFloatType, N> mins = {0};
+    KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
+    return findMinNormHelperNoRecurse(t, x, nullptr, bestNorm, mins);
+  }
+
+  template <typename T>
   static Elem* findMinNormConstraints(rkdt t, const T& x,
                                       const std::vector<KDFloatType>& constraints)
   {
@@ -608,6 +616,59 @@ private:
         bestObj = findMinNormHelper(t->right, x, bestObj, bestNorm, minBounds);
       }
       minBounds[dim] = oldMin;
+    }
+
+    return bestObj;
+  }
+
+  template <typename T>
+  static Elem* findMinNormHelperNoRecurse(rkdt t, const T& x, Elem* bestObj,
+                                          KDFloatType& bestNorm,
+                                          std::array<KDFloatType, N>& minBounds)
+  {
+    using entry_t = std::pair<rkdt, std::array<KDFloatType, N>>;
+    std::stack<entry_t, std::vector<entry_t>> stack;
+
+    rkdt current = t;
+    std::array<KDFloatType, N> currentBounds = minBounds;
+
+    while (current != nullptr || !stack.empty())
+    {
+      while (current != nullptr)
+      {
+        stack.emplace(current, currentBounds);
+        current = current->left;
+      }
+
+      if (!stack.empty())
+      {
+        auto entry = stack.top();
+        rkdt node = entry.first;
+        currentBounds = std::move(entry.second);
+        stack.pop();
+
+        if (node->norm < bestNorm)
+        {
+          const auto nodeNorm = base::calcNorm(x, node->data);
+          if (nodeNorm < bestNorm)
+          {
+            bestObj = &(node->data);
+            bestNorm = nodeNorm;
+          }
+        }
+
+        if (node->right != nullptr)
+        {
+          const auto dim = node->discr;
+          currentBounds[dim] = node->data[dim];
+
+          // If this is true, then search the right branch
+          if (base::calcNorm(x, currentBounds) < bestNorm)
+          {
+            current = node->right;
+          }
+        }
+      }
     }
 
     return bestObj;

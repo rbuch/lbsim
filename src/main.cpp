@@ -249,7 +249,9 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
       // testLB<TreeStrategy::GreedyNorm>(objs, procs, "greedynorm");
       // testLB<TreeStrategy::KdLB>(objs, procs, "kd");
       testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2");
+      testLB<TreeStrategy::RKdExpLBNoRecurse<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2NoRecurse");
       testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4");
+      testLB<TreeStrategy::RKdExpLBNoRecurse<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4NoRecurse");
       testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs, "rkd8");
       testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs, procs, "rkd16");
       testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType, ProcType>(objs, procs, "rkdInf");
