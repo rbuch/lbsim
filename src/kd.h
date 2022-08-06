@@ -392,7 +392,7 @@ private:
   }
 
 public:
-  RKDNode(const Elem& key, const int numConstraints) : base(key, numConstraints), discr(random(0, N - 1)) {}
+  RKDNode(const Elem& key, const int numConstraints = 0) : base(key, numConstraints), discr(random(0, N - 1)) {}
 
   int getSplitDim(int depth = 0) override { return discr; }
 
