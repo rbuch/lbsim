@@ -5,6 +5,7 @@
 #include <array>
 #include <cmath>
 #include <type_traits>
+#define DEBUG
 #ifdef DEBUG
 #  include <iostream>
 #endif
@@ -565,6 +566,105 @@ public:
       }
     }
   }
+
+  static rkdt getParetoFrontier(rkdt t)
+  {
+    if (t == nullptr)
+      return t;
+//#define DEBUGINNER
+#ifdef DEBUGINNER
+    std::cout << "At " << t->data.id << std::endl;
+#endif
+
+    if (t->left == nullptr && t->right == nullptr)
+    {
+      return new RKDNode(t->data);
+    }
+
+    // elements in leftFront can never be dominated by elements in right front
+    // since all elements in left are < t->data[t->discr] and all elements in
+    // right are >=
+    rkdt l_frontier = getParetoFrontier(t->left);
+    rkdt r_frontier = getParetoFrontier(t->right);
+
+#ifdef DEBUGINNER
+    std::cout << "Merging at " << t->data.id << std::endl;
+    std::cout << "Left:" << std::endl;
+    base::printTree(l_frontier);
+    std::cout << "Right:" << std::endl;
+    base::printTree(r_frontier);
+#endif
+
+    std::stack<rkdt> r_stack;
+    if (r_frontier != nullptr)
+      r_stack.push(r_frontier);
+
+    // Add elements from the right frontier that are not dominated by anything
+    // in the left frontier to the left frontier
+    while (!r_stack.empty())
+    {
+      rkdt current = r_stack.top();
+      r_stack.pop();
+      if (current->right != nullptr)
+        r_stack.push(current->right);
+      if (current->left != nullptr)
+        r_stack.push(current->left);
+
+      if (!isDominated(l_frontier, current->data))
+      {
+        l_frontier = insert(l_frontier, current->data);
+      }
+
+      delete current;
+    }
+
+    // Finally, see if this node itself is in the frontier, and add it if so
+    if (!isDominated(l_frontier, t->data))
+    {
+      l_frontier = insert(l_frontier, t->data);
+    }
+
+
+#ifdef DEBUGINNER
+    std::cout << "Done Merging at " << t->data.id << std::endl;
+    std::cout << "Final:" << std::endl;
+    base::printTree(l_frontier);
+#endif
+
+    return l_frontier;
+  }
+
+  // true if x is dominated by some node in t (i.e. some node is <= x in every dim), else false
+  template <typename T>
+  static bool isDominated(rkdt t, const T& x)
+    {
+      if (t == nullptr)
+        return false;
+
+      bool tDominates = true;
+      for (int i = 0; i < N; i++)
+      {
+        if (x[i] < t->data[i])
+        {
+          tDominates = false;
+          break;
+        }
+      }
+
+      if (tDominates)
+        return true;
+
+      const auto dim = t->discr;
+
+      if (x[dim] < t->data[dim])
+      {
+        return isDominated(t->left, x);
+      }
+      else
+      {
+        return isDominated(t->left, x) || isDominated(t->right, x);
+      }
+    }
 
   template <typename T>
   static Elem* findMinNorm(rkdt t, const T& x)
