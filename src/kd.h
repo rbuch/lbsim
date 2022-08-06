@@ -575,6 +575,15 @@ public:
   }
 
   template <typename T>
+  static Elem* findMinNormObjNorm(rkdt t, const T& x)
+  {
+    std::array<KDFloatType, N> mins = {0};
+    KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
+    return findMinNormHelperObjNorm(t, x, nullptr, bestNorm, mins, base::calcNorm(x));
+  }
+
+
+  template <typename T>
   static Elem* findMinNormConstraints(rkdt t, const T& x,
                                       const std::vector<KDFloatType>& constraints)
   {
@@ -611,6 +620,38 @@ private:
       if (base::calcNorm(x, minBounds) < bestNorm)
       {
         bestObj = findMinNormHelper(t->right, x, bestObj, bestNorm, minBounds);
+      }
+      minBounds[dim] = oldMin;
+    }
+
+    return bestObj;
+  }
+
+  template <typename T>
+  static Elem* findMinNormHelperObjNorm(rkdt t, const T& x, Elem* bestObj, KDFloatType& bestNorm,
+                                 std::array<KDFloatType, N>& minBounds, const KDFloatType xNorm)
+  {
+    if (t->left != nullptr)
+    {
+      bestObj = findMinNormHelperObjNorm(t->left, x, bestObj, bestNorm, minBounds, xNorm);
+    }
+    if (t->norm + xNorm < bestNorm)
+    {
+      const auto rootNorm = base::calcNorm(x, t->data);
+      if (rootNorm < bestNorm)
+      {
+        bestObj = &(t->data);
+        bestNorm = rootNorm;
+      }
+    }
+    if (t->right != nullptr)
+    {
+      const auto dim = t->discr;
+      const auto oldMin = minBounds[dim];
+      minBounds[dim] = t->data[dim];
+      if (base::calcNorm(x, minBounds) < bestNorm)
+      {
+        bestObj = findMinNormHelperObjNorm(t->right, x, bestObj, bestNorm, minBounds, xNorm);
       }
       minBounds[dim] = oldMin;
     }

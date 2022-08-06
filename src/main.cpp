@@ -245,15 +245,17 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
     {
       //testLB<TreeStrategy::Dummy, ObjType, ProcType>(objs, procs, "dummy");
       //testLB<TreeStrategy::Random, ObjType, ProcType>(objs, procs, "random");
-      testLB<TreeStrategy::Greedy, ObjType, ProcType>(objs, procs, "greedy");
+      //testLB<TreeStrategy::Greedy, ObjType, ProcType>(objs, procs, "greedy");
       // testLB<TreeStrategy::GreedyNorm>(objs, procs, "greedynorm");
       // testLB<TreeStrategy::KdLB>(objs, procs, "kd");
       testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2");
+      testLB<TreeStrategy::RKdExpLBObjNorm<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNorm");
       testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4");
-      testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs, "rkd8");
-      testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs, procs, "rkd16");
-      testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType, ProcType>(objs, procs, "rkdInf");
-      testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis");
+      testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNorm");
+      // testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs, "rkd8");
+      // testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs, procs, "rkd16");
+      // testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType, ProcType>(objs, procs, "rkdInf");
+      // testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis");
       // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
       // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
     }

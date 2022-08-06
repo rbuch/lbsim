@@ -35,6 +35,34 @@ public:
   }
 };
 
+template <typename O, typename P, typename S, typename T>
+class BaseKdLBObjNorm : public Strategy<O, P, S>
+{
+public:
+  BaseKdLBObjNorm() = default;
+  void solve(std::vector<O>& objs, std::vector<P>& procs, S& solution, bool objsSorted)
+  {
+    // Sorts by maxload in vector
+    if (!objsSorted) std::sort(objs.begin(), objs.end(), CmpLoadGreater<O>());
+
+    auto objsIter = objs.begin();
+    T* tree = nullptr;
+    for (int i = 0; i < procs.size() && objsIter != objs.end(); i++, objsIter++)
+    {
+      solution.assign(*objsIter, procs[i]);
+      tree = T::insert(tree, procs[i]);
+    }
+
+    for (; objsIter != objs.end(); objsIter++)
+    {
+      auto proc = *(T::findMinNormObjNorm(tree, *objsIter));
+      tree = T::remove(tree, proc);
+      solution.assign(*objsIter, proc);
+      tree = T::insert(tree, proc);
+    }
+  }
+};
+
 template <typename O, typename P, typename S>
 class KdLB : public BaseKdLB<O, P, S, KDNode<P>>
 {
@@ -64,6 +92,17 @@ public:
   {
   };
 };
+
+template <int Exp>
+class RKdExpLBObjNorm
+{
+public:
+  template <typename O, typename P, typename S>
+  class RKdLB : public BaseKdLBObjNorm<O, P, S, RKDNode<P, Exp>>
+  {
+  };
+};
+
 
 template <typename O, typename P, typename S, typename T>
 class BaseKdConstraintLB : public Strategy<O, P, S>
