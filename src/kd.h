@@ -130,8 +130,10 @@ protected:
 public:
   static void printTree(TreeType* tree, int depth = 0, std::string prefix = "")
   {
+    if (tree == nullptr) return;
     std::cout << prefix;
-    std::cout << tree->data.id << " (" << tree->size << ", " << tree->getSplitDim(depth) << "): ";
+    std::cout << tree->data.id << " (" << tree->size << ", " << tree->getSplitDim(depth)
+              << "): ";
     for (int i = 0; i < N; i++) std::cout << tree->data[i] << " ";
     std::cout << std::endl;
     if (tree->left != nullptr) printTree(tree->left, depth + 1, prefix + "L  ");
@@ -141,7 +143,10 @@ public:
   static size_t countNodes(TreeType* tree)
   {
     size_t count = 0;
-    if (tree != nullptr) count++;
+    if (tree == nullptr)
+      return count;
+    else
+      count++;
     if (tree->left != nullptr) count += countNodes(tree->left);
     if (tree->right != nullptr) count += countNodes(tree->right);
 
