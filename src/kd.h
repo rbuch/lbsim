@@ -573,7 +573,46 @@ public:
     return getParetoFrontierHelper(t, minBounds, nullptr);
   }
 
-  static rkdt getParetoFrontierHelper(rkdt t, std::array<KDFloatType, N>& minBounds,
+  static rkdt getParetoFrontier(const rkdt t, rkdt paretoFrontier = nullptr)
+  {
+    std::array<KDFloatType, N> minBounds = {0};
+    return getParetoFrontierHelper(t, minBounds, paretoFrontier);
+  }
+
+  static rkdt updateParetoFrontier(const rkdt t, std::array<KDFloatType, N>& minBounds,
+                                  rkdt paretoFrontier)
+  {
+    if (t == nullptr || isDominated(paretoFrontier, minBounds))
+      return paretoFrontier;
+
+    const auto dim = t->discr;
+    const auto tVal = t->data[dim];
+    const auto mVal = minBounds[dim];
+
+    if (mVal < tVal && t->left != nullptr)
+    {
+      paretoFrontier = updateParetoFrontier(t->left, minBounds, paretoFrontier);
+    }
+
+    if (mVal <= tVal && !isDominated(paretoFrontier, t->data))
+    {
+      paretoFrontier = insert(paretoFrontier, t->data);
+    }
+
+    if (t->right != nullptr)
+    {
+      minBounds[dim] = std::max(mVal, tVal);
+      if (!isDominated(paretoFrontier, minBounds))
+      {
+        paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier);
+      }
+      minBounds[dim] = mVal;
+    }
+
+    return paretoFrontier;
+  }
+
+  static rkdt getParetoFrontierHelper(const rkdt t, std::array<KDFloatType, N>& minBounds,
                                       rkdt paretoFrontier)
   {
     if (t == nullptr) return paretoFrontier;

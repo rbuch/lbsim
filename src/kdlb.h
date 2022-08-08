@@ -81,18 +81,21 @@ public:
       tree = T::insert(tree, procs[i]);
     }
 
+    T* paretoFrontier = T::getParetoFrontier(tree, nullptr);
+    std::array<KDFloatType, O::dimension> lastRemovedProc = {0};
     for (; objsIter != objs.end(); objsIter++)
     {
-      //T::printTree(tree);
-      auto paretoFrontier = T::getParetoFrontier(tree);
-
-      //std::cout << T::countNodes(tree) << " " << T::countNodes(paretoFrontier) << std::endl;
       auto proc = *(T::findMinNormObjNorm(paretoFrontier, *objsIter));
 
-      //auto proc = *(T::findMinNormObjNorm(tree, *objsIter));
+      for (int i = 0; i < O::dimension; i++)
+        lastRemovedProc[i] = proc[i];
+
       tree = T::remove(tree, proc);
+      paretoFrontier = T::remove(paretoFrontier, proc);
+
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc);
+      paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier);
     }
   }
 };
