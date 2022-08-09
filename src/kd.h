@@ -816,7 +816,6 @@ private:
         if (found)
         {
           earlyExit--;
-          return bestObj;
         }
       }
     }
