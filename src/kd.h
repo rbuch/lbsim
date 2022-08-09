@@ -704,7 +704,7 @@ public:
   {
     std::array<KDFloatType, N> mins = {0};
     KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
-    bool earlyExit = false;
+    int earlyExit = 5;
     return findMinNormHelperObjNormEarly(t, x, nullptr, bestNorm, mins, base::calcNorm(x), maxLoads, earlyExit);
   }
 
@@ -790,13 +790,13 @@ private:
                                              std::array<KDFloatType, N>& minBounds,
                                              const KDFloatType xNorm,
                                              const std::array<KDFloatType, N>& maxLoads,
-                                             bool& earlyExit)
+                                             int& earlyExit)
   {
     if (t->left != nullptr)
     {
       bestObj = findMinNormHelperObjNormEarly(t->left, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit);
     }
-    if (!earlyExit && t->norm + xNorm < bestNorm)
+    if (earlyExit > 0 && t->norm + xNorm < bestNorm)
     {
       const auto rootNorm = base::calcNorm(x, t->data);
       if (rootNorm < bestNorm)
@@ -815,12 +815,12 @@ private:
         }
         if (found)
         {
-          earlyExit = true;
+          earlyExit--;
           return bestObj;
         }
       }
     }
-    if (!earlyExit && t->right != nullptr)
+    if (earlyExit > 0 && t->right != nullptr)
     {
       const auto dim = t->discr;
       const auto oldMin = minBounds[dim];
