@@ -582,7 +582,7 @@ public:
   static rkdt updateParetoFrontier(const rkdt t, std::array<KDFloatType, N>& minBounds,
                                   rkdt paretoFrontier)
   {
-    if (t == nullptr || isDominated(paretoFrontier, minBounds))
+    if (t == nullptr)
       return paretoFrontier;
 
     const auto dim = t->discr;
@@ -638,37 +638,50 @@ public:
     return paretoFrontier;
   }
 
-  // true if x is dominated by some node in t (i.e. some node is <= x in every dim), else false
+  // true if x is dominated by some node in t (i.e. some node is <= x in every dim), else
+  // false
   template <typename T>
   static bool isDominated(rkdt t, const T& x)
-    {
-      if (t == nullptr)
-        return false;
+  {
+    std::vector<rkdt> stack;
+    stack.reserve(128);
 
-      bool tDominates = true;
+    if (t != nullptr)
+      stack.push_back(t);
+
+    while (!stack.empty())
+    {
+      const auto current = stack.back();
+      stack.pop_back();
+
+      const auto dim = current->discr;
+      if (x[dim] < current->data[dim])
+      {
+        if (current->left != nullptr)
+          stack.push_back(current->left);
+        continue;
+      }
+
+      bool currentDominates = true;
       for (int i = 0; i < N; i++)
       {
-        if (x[i] < t->data[i])
+        if (x[i] < current->data[i])
         {
-          tDominates = false;
+          currentDominates = false;
           break;
         }
       }
-
-      if (tDominates)
+      if (currentDominates)
         return true;
 
-      const auto dim = t->discr;
-
-      if (x[dim] < t->data[dim])
-      {
-        return isDominated(t->left, x);
-      }
-      else
-      {
-        return isDominated(t->left, x) || isDominated(t->right, x);
-      }
+      if (current->left != nullptr)
+        stack.push_back(current->left);
+      if (current->right != nullptr)
+        stack.push_back(current->right);
     }
+
+    return false;
+  }
 
   template <typename T>
   static Elem* findMinNorm(rkdt t, const T& x)
