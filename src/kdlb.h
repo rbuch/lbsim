@@ -3,6 +3,7 @@
 
 #include "TreeStrategyBase.h"
 #include "kd.h"
+#include <array>
 #include <iostream>
 
 namespace TreeStrategy
@@ -58,6 +59,46 @@ public:
       auto proc = *(T::findMinNormObjNorm(tree, *objsIter));
       tree = T::remove(tree, proc);
       solution.assign(*objsIter, proc);
+      tree = T::insert(tree, proc);
+    }
+  }
+};
+
+  template <typename O, typename P, typename S, typename T>
+class BaseKdLBObjNormEarly : public Strategy<O, P, S>
+{
+  private:
+    void updateMax(std::array<KDFloatType, O::dimension>& maxLoads, const P& proc)
+    {
+      for (int i = 0; i < O::dimension; i++)
+      {
+        maxLoads[i] = std::max(maxLoads[i], proc[i]);
+      }
+    }
+
+public:
+  BaseKdLBObjNormEarly() = default;
+  void solve(std::vector<O>& objs, std::vector<P>& procs, S& solution, bool objsSorted)
+  {
+    // Sorts by maxload in vector
+    if (!objsSorted) std::sort(objs.begin(), objs.end(), CmpLoadGreater<O>());
+
+    std::array<KDFloatType, O::dimension> maxLoads = {0};
+    auto objsIter = objs.begin();
+    T* tree = nullptr;
+    for (int i = 0; i < procs.size() && objsIter != objs.end(); i++, objsIter++)
+    {
+      solution.assign(*objsIter, procs[i]);
+      updateMax(maxLoads, procs[i]);
+      tree = T::insert(tree, procs[i]);
+    }
+
+    for (; objsIter != objs.end(); objsIter++)
+    {
+      auto proc = *(T::findMinNormObjNormEarly(tree, *objsIter, maxLoads));
+      tree = T::remove(tree, proc);
+      solution.assign(*objsIter, proc);
+      updateMax(maxLoads, proc);
       tree = T::insert(tree, proc);
     }
   }
@@ -137,6 +178,16 @@ class RKdExpLBObjNorm
 public:
   template <typename O, typename P, typename S>
   class RKdLB : public BaseKdLBObjNorm<O, P, S, RKDNode<P, Exp>>
+  {
+  };
+};
+
+template <int Exp>
+class RKdExpLBObjNormEarly
+{
+public:
+  template <typename O, typename P, typename S>
+  class RKdLB : public BaseKdLBObjNormEarly<O, P, S, RKDNode<P, Exp>>
   {
   };
 };

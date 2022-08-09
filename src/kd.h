@@ -699,6 +699,14 @@ public:
     return findMinNormHelperObjNorm(t, x, nullptr, bestNorm, mins, base::calcNorm(x));
   }
 
+  template <typename T>
+  static Elem* findMinNormObjNormEarly(rkdt t, const T& x, const std::array<KDFloatType, N>& maxLoads)
+  {
+    std::array<KDFloatType, N> mins = {0};
+    KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
+    bool earlyExit = false;
+    return findMinNormHelperObjNormEarly(t, x, nullptr, bestNorm, mins, base::calcNorm(x), maxLoads, earlyExit);
+  }
 
   template <typename T>
   static Elem* findMinNormConstraints(rkdt t, const T& x,
@@ -769,6 +777,58 @@ private:
       if (base::calcNorm(x, minBounds) < bestNorm)
       {
         bestObj = findMinNormHelperObjNorm(t->right, x, bestObj, bestNorm, minBounds, xNorm);
+      }
+      minBounds[dim] = oldMin;
+    }
+
+    return bestObj;
+  }
+
+  template <typename T>
+  static Elem* findMinNormHelperObjNormEarly(rkdt t, const T& x, Elem* bestObj,
+                                             KDFloatType& bestNorm,
+                                             std::array<KDFloatType, N>& minBounds,
+                                             const KDFloatType xNorm,
+                                             const std::array<KDFloatType, N>& maxLoads,
+                                             bool& earlyExit)
+  {
+    if (t->left != nullptr)
+    {
+      bestObj = findMinNormHelperObjNormEarly(t->left, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit);
+    }
+    if (!earlyExit && t->norm + xNorm < bestNorm)
+    {
+      const auto rootNorm = base::calcNorm(x, t->data);
+      if (rootNorm < bestNorm)
+      {
+        bestObj = &(t->data);
+        bestNorm = rootNorm;
+
+        bool found = true;
+        for (int i = 0; i < N; i++)
+        {
+          if (t->data[i] + x[i] > maxLoads[i])
+          {
+            found = false;
+            break;
+          }
+        }
+        if (found)
+        {
+          earlyExit = true;
+          return bestObj;
+        }
+      }
+    }
+    if (!earlyExit && t->right != nullptr)
+    {
+      const auto dim = t->discr;
+      const auto oldMin = minBounds[dim];
+      minBounds[dim] = t->data[dim];
+      if (base::calcNorm(x, minBounds) < bestNorm)
+      {
+        bestObj =
+            findMinNormHelperObjNormEarly(t->right, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit);
       }
       minBounds[dim] = oldMin;
     }
