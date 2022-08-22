@@ -601,12 +601,17 @@ public:
 
     if (t->right != nullptr)
     {
-      minBounds[dim] = std::max(mVal, tVal);
-      if (!isDominated(paretoFrontier, minBounds))
+      if (mVal < tVal)
       {
-        paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier);
+        minBounds[dim] = tVal;
+        if (!isDominated(paretoFrontier, minBounds))
+        {
+          paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier);
+        }
+        minBounds[dim] = mVal;
       }
-      minBounds[dim] = mVal;
+      else
+        paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier);
     }
 
     return paretoFrontier;
