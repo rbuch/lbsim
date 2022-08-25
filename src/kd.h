@@ -648,7 +648,7 @@ public:
   }
 
   static rkdt updateParetoFrontier(const rkdt t, std::array<KDFloatType, N>& minBounds,
-                                  rkdt paretoFrontier)
+                                  rkdt paretoFrontier, const std::array<KDFloatType, N>& nn)
   {
     if (t == nullptr)
       return paretoFrontier;
@@ -659,10 +659,10 @@ public:
 
     if (mVal < tVal && t->left != nullptr)
     {
-      paretoFrontier = updateParetoFrontier(t->left, minBounds, paretoFrontier);
+      paretoFrontier = updateParetoFrontier(t->left, minBounds, paretoFrontier, nn);
     }
 
-    if (mVal <= tVal && !isDominated(paretoFrontier, t->data))
+    if (mVal <= tVal && !base::isDominated(nn, t->data) && !isDominated(paretoFrontier, t->data))
     {
       paretoFrontier = insert(paretoFrontier, t->data);
     }
@@ -672,14 +672,14 @@ public:
       if (mVal < tVal)
       {
         minBounds[dim] = tVal;
-        if (!isDominated(paretoFrontier, minBounds))
+        if (!base::isDominated(nn, minBounds) && !isDominated(paretoFrontier, minBounds))
         {
-          paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier);
+          paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier, nn);
         }
         minBounds[dim] = mVal;
       }
       else
-        paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier);
+        paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier, nn);
     }
 
     return paretoFrontier;

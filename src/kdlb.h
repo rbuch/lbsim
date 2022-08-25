@@ -136,7 +136,8 @@ public:
 
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc);
-      paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier);
+      const auto nn = T::getNN(paretoFrontier, lastRemovedProc);
+      paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier, nn);
     }
   }
 };
