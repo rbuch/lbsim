@@ -125,6 +125,30 @@ protected:
     return sum;
   }
 
+  template <typename A, typename B>
+  static KDFloatType distance2(const A& a, const B& b)
+  {
+    KDFloatType distance2 = 0;
+    for (int i = 0; i < N; i++)
+    {
+      distance2 += std::pow(a[i] - b[i], 2);
+    }
+
+    return distance2;
+  }
+
+  // true if a dominates b
+  template <typename A, typename B>
+  static bool isDominated(const A& a, const B& b)
+  {
+    for (int i = 0; i < N; i++)
+    {
+      if (b[i] < a[i])
+        return false;
+    }
+    return true;
+  }
+
   virtual int getSplitDim(int depth = 0) = 0;
 
 #ifdef DEBUG
@@ -567,6 +591,50 @@ public:
     }
   }
 
+  template <typename T>
+  static std::array<KDFloatType, N> getNN(rkdt t, const T& x)
+  {
+    KDFloatType distance2 = std::numeric_limits<KDFloatType>::max();
+    const auto nn = getNNHelper(t, x, distance2);
+    std::array<KDFloatType, N> result = {0};
+    for (int i = 0; i < N; i++)
+    {
+      result[i] = nn->data[i];
+    }
+
+    return result;
+  }
+
+  template <typename T>
+  static rkdt getNNHelper(rkdt t, const T& x, KDFloatType& bestDistance2)
+  {
+    const auto discr = t->discr;
+    const bool leftFirst = x[discr] < t->data[discr];
+    const auto first = (leftFirst) ? t->left : t->right;
+    const auto second = (leftFirst) ? t->right : t->left;
+    rkdt best = (first == nullptr) ? t : getNNHelper(first, x, bestDistance2);
+
+    const auto tDistance2 = base::distance2(x, t->data);
+    if (tDistance2 < bestDistance2)
+    {
+      best = t;
+      bestDistance2 = tDistance2;
+    }
+
+    if (second != nullptr && std::pow(x[discr] - t->data[discr], 2) < bestDistance2)
+    {
+      auto candidateDistance2 = bestDistance2;
+      const auto candidate = getNNHelper(second, x, candidateDistance2);
+      if (candidateDistance2 < bestDistance2)
+      {
+        best = candidate;
+        bestDistance2 = candidateDistance2;
+      }
+    }
+
+    return best;
+  }
+
   static rkdt getParetoFrontier(rkdt t)
   {
     std::array<KDFloatType, N> minBounds = {0};
@@ -667,16 +735,7 @@ public:
         continue;
       }
 
-      bool currentDominates = true;
-      for (int i = 0; i < N; i++)
-      {
-        if (x[i] < current->data[i])
-        {
-          currentDominates = false;
-          break;
-        }
-      }
-      if (currentDominates)
+      if (base::isDominated(current->data, x))
         return true;
 
       if (current->left != nullptr)
