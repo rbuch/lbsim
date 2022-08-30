@@ -783,6 +783,68 @@ public:
     return result;
   }
 
+  template <typename T>
+  static Elem* findMinNormObjNormStack(rkdt t, const T& x)
+  {
+    Elem* bestObj = nullptr;
+    KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
+
+    std::array<KDFloatType, N> minBounds = {0};
+    const KDFloatType xNorm = base::calcNorm(x);
+
+    std::stack<std::pair<rkdt, std::array<KDFloatType, N>>> fresh;
+    std::stack<std::pair<rkdt, std::array<KDFloatType, N>>> candidates;
+
+    if (t != nullptr) fresh.emplace(t, minBounds);
+
+  start:
+    while (!fresh.empty())
+    {
+      const auto top = fresh.top();
+      const auto current = top.first;
+      const auto curBounds = std::move(top.second);
+      fresh.pop();
+
+      if (current->left != nullptr)
+      {
+        fresh.emplace(current->left, curBounds);
+      }
+
+      candidates.emplace(current, curBounds);
+    }
+
+    while (!candidates.empty())
+    {
+      const auto top = candidates.top();
+      const auto current = top.first;
+      auto curBounds = std::move(top.second);
+      candidates.pop();
+
+      if (current->norm + xNorm < bestNorm)
+      {
+        const auto curNorm = base::calcNorm(x, current->data);
+        if (curNorm < bestNorm)
+        {
+          bestObj = &(current->data);
+          bestNorm = curNorm;
+        }
+      }
+
+      if (current->right != nullptr)
+      {
+        const auto dim = current->discr;
+        curBounds[dim] = current->data[dim];
+        if (base::calcNorm(x, minBounds) < bestNorm)
+        {
+          fresh.emplace(current->right, std::move(curBounds));
+          goto start;
+        }
+      }
+    }
+
+    return bestObj;
+  }
+
 private:
   template <typename T>
   static Elem* findMinNormHelper(rkdt t, const T& x, Elem* bestObj, KDFloatType& bestNorm,

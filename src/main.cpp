@@ -250,10 +250,12 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
       // testLB<TreeStrategy::KdLB>(objs, procs, "kd");
       testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2");
       testLB<TreeStrategy::RKdExpLBObjNorm<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNorm");
+      testLB<TreeStrategy::RKdExpLBObjNormStack<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNormStack");
       testLB<TreeStrategy::RKdExpLBObjNormEarly<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNormEarly");
       testLB<TreeStrategy::RKdExpLBPareto<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2Pareto");
       testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4");
       testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNorm");
+      testLB<TreeStrategy::RKdExpLBObjNormStack<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNormStack");
       testLB<TreeStrategy::RKdExpLBObjNormEarly<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNormEarly");
       testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4Pareto");
       // testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs, "rkd8");
