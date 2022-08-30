@@ -792,8 +792,10 @@ public:
     std::array<KDFloatType, N> minBounds = {0};
     const KDFloatType xNorm = base::calcNorm(x);
 
-    std::stack<std::pair<rkdt, std::array<KDFloatType, N>>> fresh;
-    std::stack<std::pair<rkdt, std::array<KDFloatType, N>>> candidates;
+    using stack_t = std::pair<rkdt, std::array<KDFloatType, N>>;
+
+    static std::stack<stack_t, std::vector<stack_t>> fresh;
+    static std::stack<stack_t, std::vector<stack_t>> candidates;
 
     if (t != nullptr) fresh.emplace(t, minBounds);
 
