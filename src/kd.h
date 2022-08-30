@@ -834,7 +834,7 @@ public:
       {
         const auto dim = current->discr;
         curBounds[dim] = current->data[dim];
-        if (base::calcNorm(x, minBounds) < bestNorm)
+        if (base::calcNorm(x, curBounds) < bestNorm)
         {
           fresh.emplace(current->right, std::move(curBounds));
           goto start;
