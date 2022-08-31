@@ -151,6 +151,46 @@ public:
   }
 };
 
+template <typename O, typename P, typename S, typename T>
+class BaseKdLBParetoNNDim : public Strategy<O, P, S>
+{
+public:
+  BaseKdLBParetoNNDim() = default;
+  void solve(std::vector<O>& objs, std::vector<P>& procs, S& solution, bool objsSorted)
+  {
+    // Sorts by maxload in vector
+    if (!objsSorted) std::sort(objs.begin(), objs.end(), CmpLoadGreater<O>());
+
+    auto objsIter = objs.begin();
+    T* tree = nullptr;
+    for (int i = 0; i < procs.size() && objsIter != objs.end(); i++, objsIter++)
+    {
+      solution.assign(*objsIter, procs[i]);
+      tree = T::insert(tree, procs[i]);
+    }
+
+    T* paretoFrontier = T::getParetoFrontier(tree, nullptr);
+    std::array<KDFloatType, O::dimension> lastRemovedProc = {0};
+    for (; objsIter != objs.end(); objsIter++)
+    {
+      auto proc = *(T::findMinNormObjNorm(paretoFrontier, *objsIter));
+
+      for (int i = 0; i < O::dimension; i++)
+        lastRemovedProc[i] = proc[i];
+
+      tree = T::remove(tree, proc);
+      paretoFrontier = T::remove(paretoFrontier, proc);
+
+      solution.assign(*objsIter, proc);
+      tree = T::insert(tree, proc);
+      const auto nns = T::getNNDim(paretoFrontier, lastRemovedProc);
+      paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier, nns);
+    }
+
+    delete tree;
+    delete paretoFrontier;
+  }
+};
 
 template <typename O, typename P, typename S>
 class KdLB : public BaseKdLB<O, P, S, KDNode<P>>
@@ -208,6 +248,16 @@ class RKdExpLBPareto
 public:
   template <typename O, typename P, typename S>
   class RKdLB : public BaseKdLBPareto<O, P, S, RKDNode<P, Exp>>
+  {
+  };
+};
+
+template <int Exp>
+class RKdExpLBParetoNNDim
+{
+public:
+  template <typename O, typename P, typename S>
+  class RKdLB : public BaseKdLBParetoNNDim<O, P, S, RKDNode<P, Exp>>
   {
   };
 };

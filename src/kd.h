@@ -11,6 +11,7 @@
 #endif
 #include <limits>
 #include <random>
+#include <set>
 #include <stack>
 #include <utility>
 
@@ -614,10 +615,13 @@ public:
   {
     KDFloatType distance2 = std::numeric_limits<KDFloatType>::max();
     const auto nn = getNNHelper(t, x, distance2);
-    std::array<KDFloatType, N> result = {0};
-    for (int i = 0; i < N; i++)
+    std::array<KDFloatType, N> result = {std::numeric_limits<KDFloatType>::max()};
+    if (nn != nullptr)
     {
-      result[i] = nn->data[i];
+      for (int i = 0; i < N; i++)
+      {
+        result[i] = nn->data[i];
+      }
     }
 
     return result;
@@ -626,6 +630,7 @@ public:
   template <typename T>
   static rkdt getNNHelper(rkdt t, const T& x, KDFloatType& bestDistance2)
   {
+    if (t == nullptr) return nullptr;
     const auto discr = t->discr;
     const bool leftFirst = x[discr] < t->data[discr];
     const auto first = (leftFirst) ? t->left : t->right;
@@ -643,6 +648,79 @@ public:
     {
       auto candidateDistance2 = bestDistance2;
       const auto candidate = getNNHelper(second, x, candidateDistance2);
+      if (candidateDistance2 < bestDistance2)
+      {
+        best = candidate;
+        bestDistance2 = candidateDistance2;
+      }
+    }
+
+    return best;
+  }
+
+  template <typename T>
+  static std::vector<std::array<KDFloatType, N>> getNNDim(rkdt t, const T& x)
+  {
+    std::vector<std::array<KDFloatType, N>> nns;
+    for (int dim = 0; dim < N; dim++)
+    {
+      KDFloatType distance2 = std::numeric_limits<KDFloatType>::max();
+      const auto nnLt = getNNHelperDim(t, x, distance2, dim, true);
+      distance2 = std::numeric_limits<KDFloatType>::max();
+      const auto nnGe = getNNHelperDim(t, x, distance2, dim, false);
+
+      if (nnLt != nullptr)
+      {
+        nns.emplace_back();
+        auto& arr = nns.back();
+        for (int i = 0; i < N; i++)
+        {
+          arr[i] = nnLt->data[i];
+        }
+      }
+
+      if (nnGe != nullptr)
+      {
+        nns.emplace_back();
+        auto& arr = nns.back();
+        for (int i = 0; i < N; i++)
+        {
+          arr[i] = nnGe->data[i];
+        }
+      }
+    }
+    return nns;
+  }
+
+  template <typename T>
+  static rkdt getNNHelperDim(rkdt t, const T& x, KDFloatType& bestDistance2,
+                             const int dim, const bool less)
+  {
+    if (t == nullptr) return nullptr;
+    const auto discr = t->discr;
+    const bool leftFirst = x[discr] < t->data[discr];
+    const auto first = (leftFirst) ? t->left : t->right;
+    const auto second = (discr == dim && leftFirst == less) ? nullptr
+                        : (leftFirst)                       ? t->right
+                                                            : t->left;
+
+    rkdt best =
+        (first == nullptr) ? nullptr : getNNHelperDim(first, x, bestDistance2, dim, less);
+
+    if (less == t->data[dim] < x[dim])
+    {
+      const auto tDistance2 = base::distance2(x, t->data);
+      if (tDistance2 < bestDistance2)
+      {
+        best = t;
+        bestDistance2 = tDistance2;
+      }
+    }
+
+    if (second != nullptr && std::pow(x[discr] - t->data[discr], 2) < bestDistance2)
+    {
+      auto candidateDistance2 = bestDistance2;
+      const auto candidate = getNNHelperDim(second, x, candidateDistance2, dim, less);
       if (candidateDistance2 < bestDistance2)
       {
         best = candidate;
@@ -698,6 +776,52 @@ public:
       }
       else
         paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier, nn);
+    }
+
+    return paretoFrontier;
+  }
+
+  static rkdt updateParetoFrontier(const rkdt t, std::array<KDFloatType, N>& minBounds,
+                                   rkdt paretoFrontier,
+                                   const std::vector<std::array<KDFloatType, N>>& nns)
+  {
+    if (t == nullptr)
+      return paretoFrontier;
+
+    const auto dim = t->discr;
+    const auto tVal = t->data[dim];
+    const auto mVal = minBounds[dim];
+
+    if (mVal < tVal && t->left != nullptr)
+    {
+      paretoFrontier = updateParetoFrontier(t->left, minBounds, paretoFrontier, nns);
+    }
+
+    if (mVal <= tVal &&
+        std::all_of(nns.cbegin(), nns.cend(),
+                    [&t](const std::array<KDFloatType, N>& nn)
+                    { return !base::isDominated(nn, t->data); }) &&
+        !isDominated(paretoFrontier, t->data))
+    {
+      paretoFrontier = insert(paretoFrontier, t->data);
+    }
+
+    if (t->right != nullptr)
+    {
+      if (mVal < tVal)
+      {
+        minBounds[dim] = tVal;
+        if (std::all_of(nns.cbegin(), nns.cend(),
+                        [&minBounds](const std::array<KDFloatType, N>& nn)
+                        { return !base::isDominated(nn, minBounds); }) &&
+            !isDominated(paretoFrontier, minBounds))
+        {
+          paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier, nns);
+        }
+        minBounds[dim] = mVal;
+      }
+      else
+        paretoFrontier = updateParetoFrontier(t->right, minBounds, paretoFrontier, nns);
     }
 
     return paretoFrontier;
