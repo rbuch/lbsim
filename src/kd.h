@@ -676,9 +676,16 @@ public:
     KDFloatType distance2 = std::numeric_limits<KDFloatType>::max();
     const auto nn = getNNHelper(t, x, distance2);
     std::array<KDFloatType, N> result = {0};
-    for (int i = 0; i < N; i++)
+    if (nn != nullptr)
     {
-      result[i] = nn->data[i];
+      for (int i = 0; i < N; i++)
+      {
+        result[i] = nn->data[i];
+      }
+    }
+    else
+    {
+      result.fill(std::numeric_limits<KDFloatType>::max());
     }
 
     return result;
@@ -687,6 +694,9 @@ public:
   template <typename T>
   static rkdt getNNHelper(rkdt t, const T& x, KDFloatType& bestDistance2)
   {
+    if (t == nullptr)
+      return nullptr;
+
     const auto discr = t->discr;
     const bool leftFirst = x[discr] < t->data[discr];
     const auto first = (leftFirst) ? t->left : t->right;
@@ -712,12 +722,6 @@ public:
     }
 
     return best;
-  }
-
-  static rkdt getParetoFrontier(rkdt t)
-  {
-    std::array<KDFloatType, N> minBounds = {0};
-    return getParetoFrontierHelper(t, minBounds, nullptr);
   }
 
   static rkdt getParetoFrontier(const rkdt t, rkdt paretoFrontier = nullptr)

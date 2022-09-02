@@ -127,7 +127,7 @@ public:
       tree = T::insert(tree, procs[i]);
     }
 
-    T* paretoFrontier = T::getParetoFrontier(tree, nullptr);
+    T* paretoFrontier = T::getParetoFrontier(tree);
     std::array<KDFloatType, O::dimension> lastRemovedProc = {0};
     for (; objsIter != objs.end(); objsIter++)
     {
@@ -142,7 +142,10 @@ public:
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc);
       const auto nn = T::getNN(paretoFrontier, lastRemovedProc);
-      paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier, nn);
+      if (paretoFrontier != nullptr)
+        paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier, nn);
+      else
+        paretoFrontier = T::getParetoFrontier(tree);
     }
 
     T::freeAll();
