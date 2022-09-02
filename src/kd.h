@@ -469,6 +469,8 @@ public:
     if (t->data == x)
     {
       const auto newRoot = join(t->left, t->right, i);
+      t->left = nullptr;
+      t->right = nullptr;
       delete t;
       return newRoot;
     }
