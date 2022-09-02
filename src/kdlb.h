@@ -141,9 +141,11 @@ public:
 
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc);
-      const auto nn = T::getNN(paretoFrontier, lastRemovedProc);
       if (paretoFrontier != nullptr)
+      {
+        const auto nn = T::getNN(paretoFrontier, lastRemovedProc);
         paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier, nn);
+      }
       else
         paretoFrontier = T::getParetoFrontier(tree);
     }
