@@ -33,6 +33,8 @@ public:
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc);
     }
+
+    delete tree;
   }
 };
 
@@ -61,6 +63,8 @@ public:
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc);
     }
+
+    delete tree;
   }
 };
 
@@ -101,6 +105,8 @@ public:
       updateMax(maxLoads, proc);
       tree = T::insert(tree, proc);
     }
+
+    delete tree;
   }
 };
 
@@ -139,6 +145,9 @@ public:
       const auto nn = T::getNN(paretoFrontier, lastRemovedProc);
       paretoFrontier = T::updateParetoFrontier(tree, lastRemovedProc, paretoFrontier, nn);
     }
+
+    delete tree;
+    delete paretoFrontier;
   }
 };
 
