@@ -27,6 +27,11 @@ protected:
   unsigned int size = 1;
 
   BaseKDNode(const Elem& key, const int numConstraints = 0) : data(key), norm(calcNorm(data, numConstraints)) {}
+  ~BaseKDNode()
+  {
+    if (left != nullptr) delete left;
+    if (right != nullptr) delete right;
+  }
 
   template <typename A>
   static KDFloatType calcNorm(const A& x)
