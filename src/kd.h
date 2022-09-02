@@ -16,7 +16,8 @@
 
 using KDFloatType = double;
 
-template <typename TreeType, typename Elem, int Exp, int N = Elem::dimension>
+template <typename TreeType, typename Elem, int Exp,
+          class Allocator = std::allocator<TreeType>, int N = Elem::dimension>
 class BaseKDNode
 {
 protected:
@@ -26,6 +27,16 @@ protected:
   KDFloatType norm;
   unsigned int size = 1;
 
+  static inline Allocator alloc;
+
+public:
+  static void* operator new(std::size_t count) { return alloc.allocate(count); }
+  static void operator delete(void* p, std::size_t count)
+  {
+    alloc.deallocate((TreeType*)p, count);
+  }
+
+protected:
   BaseKDNode(const Elem& key, const int numConstraints = 0) : data(key), norm(calcNorm(data, numConstraints)) {}
   ~BaseKDNode()
   {
