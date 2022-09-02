@@ -16,10 +16,79 @@
 
 using KDFloatType = double;
 
-template <typename TreeType, typename Elem, int Exp,
-          class Allocator = std::allocator<TreeType>, int N = Elem::dimension>
+template <typename TreeType, typename Elem, int Exp, int N = Elem::dimension>
 class BaseKDNode
 {
+private:
+  template <size_t chunksPerBlock>
+  class PoolAllocator
+  {
+  private:
+    struct Chunk
+    {
+      Chunk* next;
+    };
+
+    Chunk* currentChunk = nullptr;
+    std::vector<Chunk*> blocks;
+
+    Chunk* allocateBlock(size_t chunkSize)
+    {
+      const size_t blockSize = chunksPerBlock * chunkSize;
+      Chunk* blockBegin = reinterpret_cast<Chunk*>(malloc(blockSize));
+      Chunk* chunk = blockBegin;
+
+      for (int i = 0; i < chunksPerBlock - 1; ++i)
+      {
+        chunk->next =
+            reinterpret_cast<Chunk*>(reinterpret_cast<char*>(chunk) + chunkSize);
+        chunk = chunk->next;
+      }
+
+      chunk->next = nullptr;
+
+      return blockBegin;
+    }
+
+  public:
+    PoolAllocator() {}
+
+    void* allocate(size_t size)
+    {
+      if (currentChunk == nullptr)
+      {
+        currentChunk = allocateBlock(size);
+        blocks.push_back(currentChunk);
+      }
+
+      Chunk* freeChunk = currentChunk;
+      currentChunk = currentChunk->next;
+      return freeChunk;
+    }
+
+    void deallocate(void* chunk, size_t size)
+    {
+      reinterpret_cast<Chunk*>(chunk)->next = currentChunk;
+      currentChunk = reinterpret_cast<Chunk*>(chunk);
+    }
+
+    void reset()
+    {
+      for (Chunk* block : blocks) free(block);
+      blocks.clear();
+      currentChunk = nullptr;
+    }
+  };
+
+public:
+  static void* operator new(std::size_t size) { return alloc.allocate(size); }
+  static void operator delete(void* p, std::size_t size)
+  {
+    alloc.deallocate((TreeType*)p, size);
+  }
+
+  static void freeAll() { alloc.reset(); }
+
 protected:
   Elem data;
   TreeType* left = nullptr;
@@ -27,16 +96,8 @@ protected:
   KDFloatType norm;
   unsigned int size = 1;
 
-  static inline Allocator alloc;
+  static inline PoolAllocator<4096> alloc;
 
-public:
-  static void* operator new(std::size_t count) { return alloc.allocate(count); }
-  static void operator delete(void* p, std::size_t count)
-  {
-    alloc.deallocate((TreeType*)p, count);
-  }
-
-protected:
   BaseKDNode(const Elem& key, const int numConstraints = 0) : data(key), norm(calcNorm(data, numConstraints)) {}
   ~BaseKDNode()
   {
