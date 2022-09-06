@@ -20,14 +20,17 @@ class Obj
 };
 
 void loadFile(std::string filename, std::vector<std::vector<LoadFloatType>>& loads,
-              LoadFloatType& bgload)
+              LoadFloatType& bgload, int phase = -1)
 {
   std::ifstream file(filename);
   json data;
   file >> data;
 
   auto phases = data["phases"].get<std::vector<json>>();
-  auto tasks = phases[phases.size() - 1]["tasks"].get<std::vector<json>>();
+
+  if (phase == -1)
+    phase = phases.size() - 1;
+  auto tasks = phases[phase]["tasks"].get<std::vector<json>>();
   for (const auto& task : tasks)
   {
     if (task["entity"]["migratable"].get<bool>())

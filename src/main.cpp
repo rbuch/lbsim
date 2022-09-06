@@ -311,6 +311,11 @@ int main(int argc, char* argv[])
   char** it = std::find(argv, argv + argc, (std::string)"-vt");
   if (it != argv + argc)
   {
+    char** phaseIt = std::find(argv, argv + argc, (std::string)"-phase");
+    const int phase = (phaseIt != argv + argc) ? std::atoi(*(++phaseIt)) : -1;
+
+    std::cout << "Using phase " << phase << " from VT log files:"  << std::endl;
+
     std::vector<std::vector<LoadFloatType>> loads;
     std::vector<LoadFloatType> bgloads;
     // Read vt log files
@@ -318,7 +323,7 @@ int main(int argc, char* argv[])
     {
       std::cout << "Loading " << *it << std::endl;
       LoadFloatType bgload;
-      vt::loadFile(*it, loads, bgload);
+      vt::loadFile(*it, loads, bgload, phase);
       bgloads.push_back(bgload);
     }
 
