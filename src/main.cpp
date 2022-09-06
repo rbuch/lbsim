@@ -278,6 +278,10 @@ void testFromLogs(std::vector<std::vector<LoadFloatType>>& objLoads, std::vector
 {
   assert(!objLoads.empty());
 
+  std::cout << std::endl
+            << "Testing with " << objLoads.size() << " objects and " << bgLoads.size()
+            << " processors." << std::endl;
+
   std::vector<LoadFloatType> totalLoad(objLoads[0].size());
 
   const auto objDimension = objLoads[0].size() - 1;
