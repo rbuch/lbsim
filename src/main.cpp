@@ -30,6 +30,8 @@ constexpr void CkAssertMsg(bool cond, const char* msg)
 #include "orb.h"
 #include "fuzzyorb.h"
 
+#include "hierarchical.h"
+
 constexpr auto dimension = 2;
 constexpr auto posDimension = 3;
 using O = TreeStrategy::ObjPos<dimension>;
@@ -262,6 +264,8 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
       testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis");
       // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
       // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
+      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB>::LB, ObjType, ProcType>(objs, procs, "hierarch");
+      //testLB<TreeStrategy::HierarchicalLB<TreeStrategy::Greedy>::LB, ObjType, ProcType>(objs, procs, "hierarch");
     }
     else
     {
