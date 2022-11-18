@@ -38,7 +38,7 @@ public:
 
       // First, LB across "nodes"
       const auto rootStart = std::chrono::steady_clock::now();
-      std::vector<P> nodes(std::ceil(procs.size() / (float)pesPerNode));
+      std::vector<P> nodes(std::max(1UL, procs.size() / pesPerNode));
 
       std::array<LoadFloatType, O::dimension + 1> empty = {0};
       for (int i = 0; i < nodes.size(); i++) {
@@ -55,16 +55,22 @@ public:
       // Now, LB within each "node"
       T<O, P, S> leafStrategy;
       double leafMax = 0;
-      for (int i = 0; i < rootSol.objs.size(); i++) {
+      const auto effPesPerNode = procs.size() / nodes.size();
+      for (int i = 0; i < nodes.size(); i++)
+      {
         const auto leafStart = std::chrono::steady_clock::now();
-        std::vector<P> procSubset(((i + 1) * pesPerNode <= procs.size())
-                                      ? pesPerNode
-                                      : procs.size() % pesPerNode);
-        for (int j = 0; j < procSubset.size(); j++) {
-          ptr(procSubset[j])
-              ->populate(j + i * pesPerNode, empty.data(), nullptr);
+
+        const auto startIndex =
+            i * effPesPerNode + std::min((int)(procs.size() % effPesPerNode), i);
+        const auto size = effPesPerNode + (i < procs.size() % effPesPerNode ? 1 : 0);
+        std::vector<P> procSubset(size);
+
+        for (int j = 0; j < procSubset.size(); j++)
+        {
+          ptr(procSubset[j])->populate(j + startIndex, empty.data(), nullptr);
         }
         leafStrategy.solve(rootSol.objs[i], procSubset, solution, false);
+
         const auto leafEnd = std::chrono::steady_clock::now();
         const auto leafElapsed = std::chrono::duration<double>(leafEnd - leafStart).count();
         leafMax = std::max(leafElapsed, leafMax);
