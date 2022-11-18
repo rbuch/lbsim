@@ -3,7 +3,9 @@
 
 #include "TreeStrategyBase.h"
 #include <array>
+#include <chrono>
 #include <iostream>
+#include <limits>
 
 namespace TreeStrategy {
 template <template <typename, typename, typename, typename...> class T>
@@ -35,6 +37,9 @@ public:
 
     void solve(std::vector<O> &objs, std::vector<P> &procs, S &solution,
                bool objsSorted) {
+
+      // First, LB across "nodes"
+      const auto rootStart = std::chrono::steady_clock::now();
       std::vector<P> nodes(std::ceil(procs.size() / (float)pesPerNode));
 
       std::array<LoadFloatType, O::dimension + 1> empty = {0};
@@ -45,9 +50,15 @@ public:
       HierSolution<O, P> rootSol(nodes.size());
       T<O, P, HierSolution<O, P>> rootStrategy;
       rootStrategy.solve(objs, nodes, rootSol, false);
+      const auto rootEnd = std::chrono::steady_clock::now();
+      std::chrono::duration<double> elapsed_seconds = rootEnd - rootStart;
+      std::cout << "\tTime for root LB: " << elapsed_seconds.count() << std::endl;
 
+      // Now, LB within each "node"
       T<O, P, S> leafStrategy;
+      double leafMax = 0;
       for (int i = 0; i < rootSol.objs.size(); i++) {
+        const auto leafStart = std::chrono::steady_clock::now();
         std::vector<P> procSubset(((i + 1) * pesPerNode <= procs.size())
                                       ? pesPerNode
                                       : procs.size() % pesPerNode);
@@ -56,7 +67,12 @@ public:
               ->populate(j + i * pesPerNode, empty.data(), nullptr);
         }
         leafStrategy.solve(rootSol.objs[i], procSubset, solution, false);
+        const auto leafEnd = std::chrono::steady_clock::now();
+        const auto leafElapsed = std::chrono::duration<double>(rootEnd - rootStart).count();
+        leafMax = std::max(leafElapsed, leafMax);
       }
+      std::cout << "\tMax time for leaf LB: " << leafMax << std::endl;
+      std::cout << "\tAdj. time for hierarchical LB: " << leafMax + elapsed_seconds.count() << std::endl;
     }
   };
 };
