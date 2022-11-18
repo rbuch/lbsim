@@ -170,7 +170,7 @@ void populate(std::vector<O>& objs, std::vector<P>& procs, const int seed)
 }
 
 template<template<typename, typename, typename, typename...> class T, typename O, typename P>
-void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
+void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name, const std::vector<LoadFloatType>& knownLoadSum)
 {
   constexpr int dimension = O::dimension;
   T<O, P, Solution<O, P>> strat;
@@ -217,11 +217,29 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name)
             << *std::max_element(maxloads.begin(), maxloads.end()) / (maxDimensionSum / procs.size())
             << ")";
   std::cout << std::endl << std::endl;
+
+  // Validate results
+  bool validated = true;
+  for (int i = 0; i < totalloads.size(); i++)
+  {
+    //CkAssertMsg(totalloads[i] != knownLoadSum[i], "Load does not validate!");
+    constexpr auto EPSILON = 1.0e-5;
+    if (std::fabs(totalloads[i] - knownLoadSum[i + 1]) >= EPSILON) {
+      std::printf("%d: known: %f, calc: %f\n", i, knownLoadSum[i + 1], totalloads[i]);
+      validated = false;
+    }
+  }
+  if (!validated)
+  {
+    std::abort();
+  }
 }
 
 template <int N>
 void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& objLoads,
-                  const std::vector<LoadFloatType>& bgLoads, const bool testScalar = false)
+                  const std::vector<LoadFloatType>& bgLoads,
+                  const std::vector<LoadFloatType>& knownLoadSum,
+                  const bool testScalar = false)
 {
   if constexpr (N == 0)
     assert(false);
@@ -247,44 +265,42 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
     {
       //testLB<TreeStrategy::Dummy, ObjType, ProcType>(objs, procs, "dummy");
       //testLB<TreeStrategy::Random, ObjType, ProcType>(objs, procs, "random");
-      testLB<TreeStrategy::Greedy, ObjType, ProcType>(objs, procs, "greedy");
+      testLB<TreeStrategy::Greedy, ObjType, ProcType>(objs, procs, "greedy", knownLoadSum);
       // testLB<TreeStrategy::GreedyNorm>(objs, procs, "greedynorm");
       // testLB<TreeStrategy::KdLB>(objs, procs, "kd");
-      testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2");
-      testLB<TreeStrategy::RKdExpLBObjNorm<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNorm");
-      testLB<TreeStrategy::RKdExpLBObjNormEarly<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNormEarly");
-      testLB<TreeStrategy::RKdExpLBPareto<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2Pareto");
-      testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4");
-      testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNorm");
-      testLB<TreeStrategy::RKdExpLBObjNormEarly<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNormEarly");
-      testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4Pareto");
+      testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2", knownLoadSum);
+      testLB<TreeStrategy::RKdExpLBObjNorm<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNorm", knownLoadSum);
+      testLB<TreeStrategy::RKdExpLBObjNormEarly<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNormEarly", knownLoadSum);
+      testLB<TreeStrategy::RKdExpLBPareto<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2Pareto", knownLoadSum);
+      testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4", knownLoadSum);
+      testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNorm", knownLoadSum);
+      testLB<TreeStrategy::RKdExpLBObjNormEarly<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNormEarly", knownLoadSum);
+      testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4Pareto", knownLoadSum);
       // testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs, "rkd8");
       // testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs, procs, "rkd16");
       // testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType, ProcType>(objs, procs, "rkdInf");
-      testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis");
+      testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis", knownLoadSum);
       // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
       // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
       testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
                                           10>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<10>");
+             ObjType, ProcType>(objs, procs, "hierarch<10>", knownLoadSum);
       testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
                                           100>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<100>");
+             ObjType, ProcType>(objs, procs, "hierarch<100>", knownLoadSum);
       testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
                                           1000>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<1000>");
-
-
+             ObjType, ProcType>(objs, procs, "hierarch<1000>", knownLoadSum);
       //testLB<TreeStrategy::HierarchicalLB<TreeStrategy::Greedy>::LB, ObjType, ProcType>(objs, procs, "hierarch");
     }
     else
     {
-      testLB<TreeStrategy::ScalarGreedy, ObjType, ProcType>(objs, procs, "scalargreedy");
+      testLB<TreeStrategy::ScalarGreedy, ObjType, ProcType>(objs, procs, "scalargreedy", knownLoadSum);
     }
   }
   else
   {
-    testLBHelper<N - 1>(dim, objLoads, bgLoads, testScalar);
+    testLBHelper<N - 1>(dim, objLoads, bgLoads, knownLoadSum, testScalar);
   }
 }
 
@@ -315,9 +331,9 @@ void testFromLogs(std::vector<std::vector<LoadFloatType>>& objLoads, std::vector
   }
   std::cout << "\n\n";
 
-  testLBHelper<15>(objDimension, objLoads, bgLoads, true);
+  testLBHelper<15>(objDimension, objLoads, bgLoads, totalLoad, true);
 
-  testLBHelper<15>(objDimension, objLoads, bgLoads);
+  testLBHelper<15>(objDimension, objLoads, bgLoads, totalLoad);
 }
 
 
@@ -369,7 +385,7 @@ int main(int argc, char* argv[])
   {
     populate(objs, procs, seed);
   }
-
+/*
   std::cout << "Testing with " << numObjs << " objects and " << numProcs << " processors." << std::endl;
 
   testLB<TreeStrategy::Dummy>(objs, procs, "dummy");
@@ -389,6 +405,6 @@ int main(int argc, char* argv[])
   testLB<TreeStrategy::ORBScalar>(objs, procs, "orbScalar");
   testLB<TreeStrategy::ORBVector>(objs, procs, "orbVector");
   testLB<TreeStrategy::FuzzyORBScalar>(objs, procs, "fuzzyOrbScalar");
-
+*/
   return 0;
 }
