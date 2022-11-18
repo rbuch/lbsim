@@ -68,7 +68,7 @@ public:
         }
         leafStrategy.solve(rootSol.objs[i], procSubset, solution, false);
         const auto leafEnd = std::chrono::steady_clock::now();
-        const auto leafElapsed = std::chrono::duration<double>(rootEnd - rootStart).count();
+        const auto leafElapsed = std::chrono::duration<double>(leafEnd - leafStart).count();
         leafMax = std::max(leafElapsed, leafMax);
       }
       std::cout << "\tMax time for leaf LB: " << leafMax << std::endl;
