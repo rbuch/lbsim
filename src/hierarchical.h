@@ -8,14 +8,12 @@
 #include <limits>
 
 namespace TreeStrategy {
-template <template <typename, typename, typename, typename...> class T>
+template <template <typename, typename, typename, typename...> class T, int pesPerNode>
 class HierarchicalLB {
 public:
   template <typename O, typename P, typename S>
   class LB : public Strategy<O, P, S> {
   private:
-    const int pesPerNode = 100;
-
     template <typename _O, typename _P> class HierSolution {
       static constexpr auto dimension = _O::dimension;
 

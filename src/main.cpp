@@ -264,7 +264,9 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
       testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis");
       // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
       // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB>::LB, ObjType, ProcType>(objs, procs, "hierarch");
+      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+                                          100>::LB,
+             ObjType, ProcType>(objs, procs, "hierarch");
       //testLB<TreeStrategy::HierarchicalLB<TreeStrategy::Greedy>::LB, ObjType, ProcType>(objs, procs, "hierarch");
     }
     else
