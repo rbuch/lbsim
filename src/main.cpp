@@ -174,6 +174,7 @@ void populate(std::vector<O>& objs, std::vector<P>& procs, const int seed)
 template<template<typename, typename, typename, typename...> class T, typename O, typename P>
 void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name, const std::vector<LoadFloatType>& knownLoadSum)
 {
+  std::cout << "Testing " << lb_name << ": " << std::endl;
   constexpr int dimension = O::dimension;
   T<O, P, Solution<O, P>> strat;
   Solution<O, P> sol(procs.size());
