@@ -37,6 +37,8 @@ constexpr auto posDimension = 3;
 using O = TreeStrategy::ObjPos<dimension>;
 using P = TreeStrategy::Proc<dimension, false>;
 
+bool onlyHierarch = false;
+
 template <typename O, typename P>
 class Solution
 {
@@ -268,20 +270,32 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
       testLB<TreeStrategy::Greedy, ObjType, ProcType>(objs, procs, "greedy", knownLoadSum);
       // testLB<TreeStrategy::GreedyNorm>(objs, procs, "greedynorm");
       // testLB<TreeStrategy::KdLB>(objs, procs, "kd");
-      testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2", knownLoadSum);
-      testLB<TreeStrategy::RKdExpLBObjNorm<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNorm", knownLoadSum);
-      testLB<TreeStrategy::RKdExpLBObjNormEarly<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2ObjNormEarly", knownLoadSum);
-      testLB<TreeStrategy::RKdExpLBPareto<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2Pareto", knownLoadSum);
-      testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4", knownLoadSum);
-      testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNorm", knownLoadSum);
-      testLB<TreeStrategy::RKdExpLBObjNormEarly<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4ObjNormEarly", knownLoadSum);
-      testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4Pareto", knownLoadSum);
-      // testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs, "rkd8");
-      // testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs, procs, "rkd16");
-      // testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType, ProcType>(objs, procs, "rkdInf");
-      testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis", knownLoadSum);
-      // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
-      // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
+      if (!onlyHierarch) {
+        testLB<TreeStrategy::RKdExpLB<2>::RKdLB, ObjType, ProcType>(objs, procs, "rkd2",
+                                                                    knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNorm<2>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd2ObjNorm", knownLoadSum);
+        testLB<TreeStrategy::RKdExpLBObjNormEarly<2>::RKdLB, ObjType, ProcType>(
+            objs, procs, "rkd2ObjNormEarly", knownLoadSum);
+        testLB<TreeStrategy::RKdExpLBPareto<2>::RKdLB, ObjType, ProcType>(
+            objs, procs, "rkd2Pareto", knownLoadSum);
+        testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4",
+                                                                    knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNorm", knownLoadSum);
+        testLB<TreeStrategy::RKdExpLBObjNormEarly<4>::RKdLB, ObjType, ProcType>(
+            objs, procs, "rkd4ObjNormEarly", knownLoadSum);
+        testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(
+            objs, procs, "rkd4Pareto", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs,
+        // "rkd8"); testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs,
+        // procs, "rkd16"); testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType,
+        // ProcType>(objs, procs, "rkdInf");
+        testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis",
+                                                         knownLoadSum);
+        // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
+        // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
+      }
       testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
                                           10>::LB,
              ObjType, ProcType>(objs, procs, "hierarch<10>", knownLoadSum);
@@ -341,6 +355,10 @@ int main(int argc, char* argv[])
 {
   std::vector<O> objs;
   std::vector<P> procs;
+
+  char** hierarchIt = std::find(argv, argv + argc, (std::string)"-onlyhierarch");
+  if (hierarchIt != argv + argc)
+      onlyHierarch = true;
 
   char** it = std::find(argv, argv + argc, (std::string)"-vt");
   if (it != argv + argc)
