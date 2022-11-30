@@ -3,11 +3,13 @@
 set pmax $argv[1]
 set omax $argv[2]
 set smax $argv[3]
+set confFile $argv[4]
 
-set dir "run-"$pmax"-"$omax"-"$smax"_"(date +%s)
+set dir "run-"$pmax"-"$omax"-"$smax"-"(basename -s .json $confFile)"_"(date +%s)
 mkdir $dir
 
 for i in (seq $argv[1])
+    date +%T
     set procs (math 2^$i)
     echo $procs" procs"
     mkdir $dir/$procs
@@ -24,8 +26,8 @@ for i in (seq $argv[1])
 	    for k in (seq 0 3)
 		set seed (math $s + $k)
 		set logfile $procs"_"$objs"_"$seed".log"
-		#echo "./lbsim (math 2^$i) (math 10^$j) $seed & > $dir/$procs/$objs/$logfile"
-		./lbsim $procs $objs $seed > $dir/$procs/$objs/$logfile &
+		#echo "./lbsim (math 2^$i) (math 10^$j) $seed -json $confFile & > $dir/$procs/$objs/$logfile"
+		./lbsim $procs $objs $seed -json $confFile > $dir/$procs/$objs/$logfile &
 	    end
 	    wait
 	end
