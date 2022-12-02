@@ -14,3 +14,9 @@ target_link_libraries(lbsim PRIVATE ${METIS})
 
 add_executable(constrain src/constrain.cpp)
 target_link_libraries(constrain PRIVATE ${METIS})
+
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(lbsim PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(constrain PUBLIC OpenMP::OpenMP_CXX)
+endif()

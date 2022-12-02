@@ -276,59 +276,62 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
                                                                     knownLoadSum);
         // testLB<TreeStrategy::RKdExpLBObjNorm<2>::RKdLB, ObjType, ProcType>(
         //     objs, procs, "rkd2ObjNorm", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<2>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd2ObjNormEarly", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBPareto<2>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd2Pareto", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<2>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd2ObjNormEarly", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBPareto<2>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd2Pareto", knownLoadSum);
         testLB<TreeStrategy::RKdExpLB<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4",
                                                                     knownLoadSum);
-        // testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(
-        //     objs, procs, "rkd4ObjNorm", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4Pareto", knownLoadSum);
-        // testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs,
-        // "rkd8"); testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs,
-        // procs, "rkd16"); testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType,
-        // ProcType>(objs, procs, "rkdInf");
-        testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis",
-                                                         knownLoadSum);
+        // // testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(
+        // //     objs, procs, "rkd4ObjNorm", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4Pareto", knownLoadSum);
+        // // testLB<TreeStrategy::RKdExpLB<8>::RKdLB, ObjType, ProcType>(objs, procs,
+        // // "rkd8"); testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs,
+        // // procs, "rkd16"); testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType,
+        // // ProcType>(objs, procs, "rkdInf");
+        // testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis",
+        //                                                  knownLoadSum);
         // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
         // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
       }
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-                                          8>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<8>", knownLoadSum);
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-                                          16>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<16>", knownLoadSum);
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-                                          32>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<32>", knownLoadSum);
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-                                          64>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<64>", knownLoadSum);
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-					  128>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<128>", knownLoadSum);
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-					  256>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<256>", knownLoadSum);
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-					  512>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<512>", knownLoadSum);
-      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-					  1024>::LB,
-             ObjType, ProcType>(objs, procs, "hierarch<1024>", knownLoadSum);
-      if (procs.size() >= 2048)
-	  testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-					      2048>::LB,
-		 ObjType, ProcType>(objs, procs, "hierarch<2048>", knownLoadSum);
-      if (procs.size() >= 4096)
-	  testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
-					      4096>::LB,
-		 ObjType, ProcType>(objs, procs, "hierarch<4096>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+    //                                       8>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<8>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+    //                                       16>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<16>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+    //                                       32>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<32>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+    //                                       64>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<64>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+		// 			  128>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<128>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+		// 			  256>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<256>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+		// 			  512>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<512>", knownLoadSum);
+    //   testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+		// 			  1024>::LB,
+    //          ObjType, ProcType>(objs, procs, "hierarch<1024>", knownLoadSum);
+    //   if (procs.size() >= 2048)
+	  // testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+		// 			      2048>::LB,
+		//  ObjType, ProcType>(objs, procs, "hierarch<2048>", knownLoadSum);
+    //   if (procs.size() >= 4096)
+	  // testLB<TreeStrategy::HierarchicalLB<TreeStrategy::RKdExpLB<4>::RKdLB,
+		// 			      4096>::LB,
+		//  ObjType, ProcType>(objs, procs, "hierarch<4096>", knownLoadSum);
+
+      testLB<TreeStrategy::RKdExpLBParallel<4>::RKdLB, ObjType, ProcType>(objs, procs, "rkd4parallel",
+                                                                    knownLoadSum);
 
       //testLB<TreeStrategy::HierarchicalLB<TreeStrategy::Greedy>::LB, ObjType, ProcType>(objs, procs, "hierarch");
     }

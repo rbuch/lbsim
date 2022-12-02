@@ -6,6 +6,8 @@
 #include <array>
 #include <iostream>
 
+#include <omp.h>
+
 namespace TreeStrategy
 {
 template <typename O, typename P, typename S, typename T>
@@ -154,6 +156,68 @@ public:
   }
 };
 
+template <typename O, typename P, typename S, typename T>
+class BaseKdLBParallel : public Strategy<O, P, S>
+{
+public:
+  BaseKdLBParallel() = default;
+  void solve(std::vector<O>& objs, std::vector<P>& procs, S& solution, bool objsSorted)
+  {
+    // Sorts by maxload in vector
+    if (!objsSorted) std::sort(objs.begin(), objs.end(), CmpLoadGreater<O>());
+
+    auto objsIter = objs.begin();
+    T* tree = nullptr;
+    for (int i = 0; i < procs.size() && objsIter != objs.end(); i++, objsIter++)
+    {
+      solution.assign(*objsIter, procs[i]);
+      tree = T::insert(tree, procs[i]);
+    }
+
+    const auto numProcs = 2;//omp_get_num_procs();
+    omp_set_num_threads(numProcs);
+    std::cout << "Running with " << numProcs << " threads" << std::endl;
+    for (;objsIter != objs.end();)
+    {
+      std::vector<P> candidates(numProcs);
+
+      // Look for candidate PEs in parallel
+#pragma omp parallel num_threads(numProcs) shared(candidates)
+      {
+        const auto threadId = omp_get_thread_num();
+        if (std::distance(objs.begin(), threadId + objsIter) < objs.size())
+        {
+          candidates[threadId] = *(T::findMinNorm(tree, *(objsIter + threadId)));
+        }
+      }
+
+      const auto start = std::distance(objs.begin(), objsIter);
+      const auto end = std::min((size_t)objs.size(), (size_t)std::distance(objs.begin(), objsIter + candidates.size()));
+      std::vector<int> usedIds;
+      usedIds.reserve(candidates.size());
+      for (int i = start; i < end; i++)
+      {
+        const auto offset = i - start;
+        auto candidate = candidates[offset];
+
+        // If we've assigned to this PE already, then look for the best candidate again
+        if (std::find(usedIds.begin(), usedIds.end(), candidate.id) != usedIds.end())
+        {
+          candidate = *(T::findMinNorm(tree, *objsIter));
+        }
+
+        tree = T::remove(tree, candidate);
+        solution.assign(*objsIter, candidate);
+        tree = T::insert(tree, candidate);
+
+        usedIds.push_back(candidate.id);
+
+        objsIter++;
+      }
+    }
+    T::freeAll();
+  }
+};
 
 template <typename O, typename P, typename S>
 class KdLB : public BaseKdLB<O, P, S, KDNode<P>>
@@ -211,6 +275,16 @@ class RKdExpLBPareto
 public:
   template <typename O, typename P, typename S>
   class RKdLB : public BaseKdLBPareto<O, P, S, RKDNode<P, Exp>>
+  {
+  };
+};
+
+template <int Exp>
+class RKdExpLBParallel
+{
+public:
+  template <typename O, typename P, typename S>
+  class RKdLB : public BaseKdLBParallel<O, P, S, RKDNode<P, Exp>>
   {
   };
 };
