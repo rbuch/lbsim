@@ -1,0 +1,24 @@
+{
+    "phases":
+    [
+        {
+            "nestedProb": {
+                "ratio": [4, 1],
+                "dists": [
+                    {"normal": {"mean": 1.0, "stddev": 0.1}},
+                    {"normal": {"mean": 5.0, "stddev": 0.1}}
+                ]
+            }
+        },
+        {
+            "exponential": {"lambda": 0.1}
+        },
+        {
+            "exponential": {"lambda": 0.1}
+        }
+
+    ],
+    "dataSize": [ {"normal": {"mean": 1000000, "stddev": 100}} ],
+    "commSizes": [ 0, 0, 1024, 0 ]
+
+}
