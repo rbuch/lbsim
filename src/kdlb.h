@@ -174,7 +174,7 @@ public:
       tree = T::insert(tree, procs[i]);
     }
 
-    const auto numProcs = 2;//omp_get_num_procs();
+    const auto numProcs = omp_get_num_procs();
     omp_set_num_threads(numProcs);
     std::cout << "Running with " << numProcs << " threads" << std::endl;
     for (;objsIter != objs.end();)
