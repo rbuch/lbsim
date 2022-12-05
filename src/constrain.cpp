@@ -326,9 +326,15 @@ int main(int argc, char* argv[])
   testLB<TreeStrategy::ORBScalar>(objs, procs, "orbScalar");
   testLB<TreeStrategy::ORBVector>(objs, procs, "orbVector");
   testLB<TreeStrategy::FuzzyORBScalar>(objs, procs, "fuzzyOrbScalar");
+
   std::vector<KDFloatType> constraints = {std::ceil(1.0 * numObjs / numProcs) + .1};
   testLB<TreeStrategy::KdConstraintLB, O, P>(objs, procs, "kdConstraint", constraints);
   testLB<TreeStrategy::RKdConstraintLB, O, P>(objs, procs, "rkdConstraint", constraints);
+
+  std::vector<KDFloatType> relConstraints = {1.001};
+  std::vector<bool> isRel = {true};
+  testLB<TreeStrategy::KdConstraintLB, O, P>(objs, procs, "kdConstraintRel", relConstraints, isRel);
+  testLB<TreeStrategy::RKdConstraintLB, O, P>(objs, procs, "rkdConstraintRel", relConstraints, isRel);
 
   return 0;
 }
