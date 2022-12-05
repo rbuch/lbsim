@@ -5,6 +5,7 @@
 #include "kd.h"
 #include <array>
 #include <iostream>
+#include <numeric>
 
 namespace TreeStrategy
 {
@@ -221,13 +222,46 @@ class BaseKdConstraintLB : public Strategy<O, P, S>
 {
   private:
     const std::vector<KDFloatType>& constraints;
+    std::vector<bool> isRelative;
 
 public:
-  BaseKdConstraintLB(const std::vector<KDFloatType>& constraints) : constraints(constraints) {}
+  BaseKdConstraintLB(const std::vector<KDFloatType>& constraints)
+      : constraints(constraints)
+  {
+    isRelative.resize(constraints.size(), false);
+  }
+  BaseKdConstraintLB(const std::vector<KDFloatType>& constraints,
+                     const std::vector<bool>& isRelative)
+      : constraints(constraints), isRelative(isRelative)
+  {
+  }
 
   void solve(std::vector<O>& objs, std::vector<P>& procs, S& solution, bool objsSorted)
   {
-    const int numConstraints = constraints.size();
+    auto currentConstraints = constraints;
+    const int numConstraints = currentConstraints.size();
+
+    for (int c_i = 0, o_i = O::dimension - numConstraints; c_i < numConstraints;
+         c_i++, o_i++)
+    {
+      // If the constraint is relative, then set it to the product of the user
+      // specified constraint value and the mean load (sum / num PEs) of the
+      // corresponding dimension of the object load vectors.
+      //
+      // e.g. a user specified constraint of 1.5 for 100 objects and 10 PEs
+      // where each object's load vector has 1.0 in the corresponding dimension
+      // means the LB will keep the resulting load on every PE <= 15 = (1.0 *
+      // 100 / 10 * 1.5)
+      if (isRelative[c_i])
+      {
+        KDFloatType sum = 0.0;
+        for (const auto& obj : objs)
+        {
+          sum += obj.getLoad(o_i);
+        }
+        currentConstraints[c_i] *= sum / procs.size();
+      }
+    }
 
     // TODO: Sort only by non-constraint dimensions
     // Sorts by maxload in vector
@@ -243,7 +277,7 @@ public:
 
     for (; objsIter != objs.end(); objsIter++)
     {
-      auto proc = *(T::findMinNormConstraints(tree, *objsIter, constraints));
+      auto proc = *(T::findMinNormConstraints(tree, *objsIter, currentConstraints));
 
       tree = T::remove(tree, proc);
       //CkAssert(T::checkTree(tree);
