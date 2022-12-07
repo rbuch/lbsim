@@ -172,9 +172,10 @@ void populate(std::vector<O>& objs, std::vector<P>& procs, const int seed)
 }
 
 template<template<typename, typename, typename, typename...> class T, typename O, typename P>
-void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name, const std::vector<LoadFloatType>& knownLoadSum)
+void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name, const std::vector<LoadFloatType>& knownLoadSum, const bool warmup = false)
 {
-  std::cout << "Testing " << lb_name << ": " << std::endl;
+  if (!warmup)
+      std::cout << "Testing " << lb_name << ": " << std::endl;
   constexpr int dimension = O::dimension;
   T<O, P, Solution<O, P>> strat;
   Solution<O, P> sol(procs.size());
@@ -184,7 +185,8 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name, cons
   auto end = std::chrono::steady_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
 
-  std::cout << "Elapsed time for " << lb_name << ": "  << elapsed_seconds.count() << std::endl;
+  if (!warmup)
+      std::cout << "Elapsed time for " << lb_name << ": "  << elapsed_seconds.count() << std::endl;
   std::array<LoadFloatType, dimension> maxloads = {0};
   std::array<LoadFloatType, dimension> totalloads = {0};
 
@@ -200,26 +202,38 @@ void testLB(std::vector<O> objs, std::vector<P> procs, std::string lb_name, cons
     maxDimensionSum += *std::max_element(loadVec.begin(), loadVec.end());
   }
   LoadFloatType maxSum = 0;
-  std::cout << "Maxloads: ";
+  if (!warmup)
+      std::cout << "Maxloads: ";
   for (const auto& load : maxloads)
   {
-    std::cout << load << " ";
+    if (!warmup)
+	std::cout << load << " ";
     maxSum += load;
   }
-  std::cout << "(∑=" << maxSum << ", max=" << *std::max_element(maxloads.begin(), maxloads.end()) << ")";
-  std::cout << std::endl;
+  if (!warmup)
+  {
+    std::cout << "(∑=" << maxSum
+              << ", max=" << *std::max_element(maxloads.begin(), maxloads.end()) << ")";
+    std::cout << std::endl;
+  }
 
   LoadFloatType loadSum = 0;
-  std::cout << "Ratio: ";
+  if (!warmup)
+    std::cout << "Ratio: ";
   for (int i = 0; i < dimension; i++)
   {
-    std::cout << maxloads[i] / (totalloads[i] / procs.size()) << " ";
+    if (!warmup)
+      std::cout << maxloads[i] / (totalloads[i] / procs.size()) << " ";
     loadSum += totalloads[i];
   }
-  std::cout << "(∑=" << maxSum / (loadSum / procs.size()) << ", max="
-            << *std::max_element(maxloads.begin(), maxloads.end()) / (maxDimensionSum / procs.size())
-            << ")";
-  std::cout << std::endl << std::endl;
+  if (!warmup)
+  {
+    std::cout << "(∑=" << maxSum / (loadSum / procs.size()) << ", max="
+              << *std::max_element(maxloads.begin(), maxloads.end()) /
+                     (maxDimensionSum / procs.size())
+              << ")";
+    std::cout << std::endl << std::endl;
+  }
 
   // Validate results
   bool validated = true;
