@@ -7,10 +7,15 @@
 namespace TreeStrategy
 {
 template <typename O, typename P, typename S>
-class MetisLB : public Strategy<O, P, S>
+class BaseMetisLB : public Strategy<O, P, S>
 {
 public:
-  MetisLB() = default;
+  BaseMetisLB() = default;
+
+  virtual void split(idx_t* nvtxs, idx_t* ncon, idx_t* xadj, idx_t* adjncy, idx_t* vwgt,
+                     idx_t* vsize, idx_t* adjwgt, idx_t* nparts, real_t* tpwgts,
+                     real_t* ubvec, idx_t* options, idx_t* edgecut, idx_t* part) = 0;
+
   void solve(std::vector<O>& objs, std::vector<P>& procs, S& solution, bool objsSorted)
   {
     // Input fields:
@@ -62,14 +67,39 @@ public:
     // tpwghts: target partition weight, can pass NULL to equally divide
     // ubvec: of size ncon to indicate allowed load imbalance tolerance (> 1.0)
     // options: array of options; edgecut: stores the edgecut; pemap: mapping
-    METIS_PartGraphRecursive(&nvtxs, &ncon, xadj.data(), adjncy, vwgt.data(), vsize,
-                             adjwgt, &nparts, tpwgts, ubvec.data(), options.data(), &objval,
-                             part.data());
+    split(&nvtxs, &ncon, xadj.data(), adjncy, vwgt.data(), vsize, adjwgt, &nparts, tpwgts,
+          ubvec.data(), options.data(), &objval, part.data());
 
     for (int i = 0; i < nvtxs; i++)
     {
       solution.assign(objs[i], procs[part[i]]);
     }
+  }
+};
+
+template <typename O, typename P, typename S>
+class MetisRecurLB : public BaseMetisLB<O, P, S>
+{
+public:
+  void split(idx_t* nvtxs, idx_t* ncon, idx_t* xadj, idx_t* adjncy, idx_t* vwgt,
+             idx_t* vsize, idx_t* adjwgt, idx_t* nparts, real_t* tpwgts, real_t* ubvec,
+             idx_t* options, idx_t* edgecut, idx_t* part) override
+  {
+    METIS_PartGraphRecursive(nvtxs, ncon, xadj, adjncy, vwgt, vsize, adjwgt, nparts,
+                             tpwgts, ubvec, options, edgecut, part);
+  }
+};
+
+template <typename O, typename P, typename S>
+class MetisKWayLB : public BaseMetisLB<O, P, S>
+{
+public:
+  void split(idx_t* nvtxs, idx_t* ncon, idx_t* xadj, idx_t* adjncy, idx_t* vwgt,
+             idx_t* vsize, idx_t* adjwgt, idx_t* nparts, real_t* tpwgts, real_t* ubvec,
+             idx_t* options, idx_t* edgecut, idx_t* part) override
+  {
+    METIS_PartGraphKway(nvtxs, ncon, xadj, adjncy, vwgt, vsize, adjwgt, nparts, tpwgts,
+                        ubvec, options, edgecut, part);
   }
 };
 

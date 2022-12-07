@@ -292,8 +292,11 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
         // "rkd8"); testLB<TreeStrategy::RKdExpLB<16>::RKdLB, ObjType, ProcType>(objs,
         // procs, "rkd16"); testLB<TreeStrategy::RKdExpLB<100>::RKdLB, ObjType,
         // ProcType>(objs, procs, "rkdInf");
-        testLB<TreeStrategy::MetisLB, ObjType, ProcType>(objs, procs, "metis",
+        testLB<TreeStrategy::MetisRecurLB, ObjType, ProcType>(objs, procs, "metisRecur",
                                                          knownLoadSum);
+        testLB<TreeStrategy::MetisKWayLB, ObjType, ProcType>(objs, procs, "metisKWay",
+                                                         knownLoadSum);
+
         // testLB<TreeStrategy::GreedySample>(objs, procs, "greedysample");
         // testLB<TreeStrategy::RandomScore>(objs, procs, "randomScore");
       }
