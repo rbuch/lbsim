@@ -349,7 +349,12 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
     else
     {
       testLB<TreeStrategy::ScalarGreedy, ObjType, ProcType>(objs, procs, "scalargreedy",
+                                                            knownLoadSum, true);
+      testLB<TreeStrategy::ScalarGreedy, ObjType, ProcType>(objs, procs, "scalargreedy",
                                                             knownLoadSum);
+
+      testLB<TreeStrategy::HierarchicalLB<TreeStrategy::ScalarGreedy, 128>::LB, ObjType,
+             ProcType>(objs, procs, "sgreedy<128>", knownLoadSum, true);
       testLB<TreeStrategy::HierarchicalLB<TreeStrategy::ScalarGreedy, 128>::LB, ObjType,
              ProcType>(objs, procs, "sgreedy<128>", knownLoadSum);
     }
