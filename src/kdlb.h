@@ -34,6 +34,7 @@ public:
       solution.assign(*objsIter, proc);
       tree = T::insert(tree, proc);
     }
+    std::cout << "Height: " << T::height(tree) << std::endl;
     T::freeAll();
   }
 };

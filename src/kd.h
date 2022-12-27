@@ -230,6 +230,14 @@ protected:
 
 #ifdef DEBUG
 public:
+
+  static size_t height(TreeType* tree)
+  {
+    if (tree == nullptr)
+      return 0;
+    return 1 + std::max(height(tree->left), height(tree->right));
+  }
+
   static void printTree(TreeType* tree, int depth = 0, std::string prefix = "")
   {
     if (tree == nullptr) return;
