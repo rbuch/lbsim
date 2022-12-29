@@ -847,11 +847,11 @@ public:
   }
 
   template <typename T>
-  static Elem* findMinNormObjNormEarly(rkdt t, const T& x, const std::array<KDFloatType, N>& maxLoads, int earlyExit)
+  static Elem* findMinNormObjNormEarly(rkdt t, const T& x, const std::array<KDFloatType, N>& maxLoads, int earlyExit, bool& didEarly)
   {
     std::array<KDFloatType, N> mins = {0};
     KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
-    return findMinNormHelperObjNormEarly(t, x, nullptr, bestNorm, mins, base::calcNorm(x), maxLoads, earlyExit);
+    return findMinNormHelperObjNormEarly(t, x, nullptr, bestNorm, mins, base::calcNorm(x), maxLoads, earlyExit, didEarly);
   }
 
   template <typename T>
@@ -936,11 +936,11 @@ private:
                                              std::array<KDFloatType, N>& minBounds,
                                              const KDFloatType xNorm,
                                              const std::array<KDFloatType, N>& maxLoads,
-                                             int& earlyExit)
+                                             int& earlyExit, bool& didEarly)
   {
     if (t->left != nullptr)
     {
-      bestObj = findMinNormHelperObjNormEarly(t->left, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit);
+      bestObj = findMinNormHelperObjNormEarly(t->left, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit, didEarly);
     }
     if (earlyExit > 0 && t->norm + xNorm < bestNorm)
     {
@@ -962,6 +962,8 @@ private:
         if (found)
         {
           earlyExit--;
+	  if (earlyExit == 0)
+	      didEarly = true;
         }
       }
     }
@@ -973,7 +975,7 @@ private:
       if (base::calcNorm(x, minBounds) < bestNorm)
       {
         bestObj =
-            findMinNormHelperObjNormEarly(t->right, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit);
+            findMinNormHelperObjNormEarly(t->right, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit, didEarly);
       }
       minBounds[dim] = oldMin;
     }

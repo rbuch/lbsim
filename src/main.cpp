@@ -298,31 +298,31 @@ void testLBHelper(size_t dim, const std::vector<std::vector<LoadFloatType>>& obj
         //                                                             knownLoadSum);
         // testLB<TreeStrategy::RKdExpLBObjNorm<4>::RKdLB, ObjType, ProcType>(
         //     objs, procs, "rkd4ObjNorm", knownLoadSum);
-	  testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 1>::RKdLB, ObjType, ProcType>(
-										     objs, procs, "rkd4ObjNormEarly-1", knownLoadSum, true);
-	  testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 1>::RKdLB, ObjType, ProcType>(
-										     objs, procs, "rkd4ObjNormEarly-1", knownLoadSum, true);
+	  // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 1>::RKdLB, ObjType, ProcType>(
+	  // 									     objs, procs, "rkd4ObjNormEarly-1", knownLoadSum, true);
+	  // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 1>::RKdLB, ObjType, ProcType>(
+	  // 									     objs, procs, "rkd4ObjNormEarly-1", knownLoadSum, true);
 
         testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 1>::RKdLB, ObjType, ProcType>(
             objs, procs, "rkd4ObjNormEarly-1", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 2>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-2", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 3>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-3", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 4>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-4", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 5>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-5", knownLoadSum);
-	testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 6>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-6", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 7>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-7", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 8>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-8", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 9>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-9", knownLoadSum);
-        testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 10>::RKdLB, ObjType, ProcType>(
-            objs, procs, "rkd4ObjNormEarly-10", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 2>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-2", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 3>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-3", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 4>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-4", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 5>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-5", knownLoadSum);
+	// testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 6>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-6", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 7>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-7", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 8>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-8", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 9>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-9", knownLoadSum);
+        // testLB<TreeStrategy::RKdExpLBObjNormEarly<4, 10>::RKdLB, ObjType, ProcType>(
+        //     objs, procs, "rkd4ObjNormEarly-10", knownLoadSum);
 
         // testLB<TreeStrategy::RKdExpLBPareto<4>::RKdLB, ObjType, ProcType>(
         //     objs, procs, "rkd4Pareto", knownLoadSum);
