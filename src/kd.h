@@ -847,11 +847,14 @@ public:
   }
 
   template <typename T>
-  static Elem* findMinNormObjNormEarly(rkdt t, const T& x, const std::array<KDFloatType, N>& maxLoads, int earlyExit, bool& didEarly)
+  static Elem* findMinNormObjNormEarly(rkdt t, const T& x,
+                                       const std::array<KDFloatType, N>& maxLoads,
+                                       int earlyExit, bool& didEarly, int& count)
   {
     std::array<KDFloatType, N> mins = {0};
     KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
-    return findMinNormHelperObjNormEarly(t, x, nullptr, bestNorm, mins, base::calcNorm(x), maxLoads, earlyExit, didEarly);
+    return findMinNormHelperObjNormEarly(t, x, nullptr, bestNorm, mins, base::calcNorm(x),
+                                         maxLoads, earlyExit, didEarly, count);
   }
 
   template <typename T>
@@ -936,14 +939,15 @@ private:
                                              std::array<KDFloatType, N>& minBounds,
                                              const KDFloatType xNorm,
                                              const std::array<KDFloatType, N>& maxLoads,
-                                             int& earlyExit, bool& didEarly)
+                                             int& earlyExit, bool& didEarly, int& count)
   {
     if (t->left != nullptr)
     {
-      bestObj = findMinNormHelperObjNormEarly(t->left, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit, didEarly);
+	bestObj = findMinNormHelperObjNormEarly(t->left, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit, didEarly, count);
     }
     if (earlyExit > 0 && t->norm + xNorm < bestNorm)
     {
+      count++;
       const auto rootNorm = base::calcNorm(x, t->data);
       if (rootNorm < bestNorm)
       {
@@ -975,7 +979,7 @@ private:
       if (base::calcNorm(x, minBounds) < bestNorm)
       {
         bestObj =
-            findMinNormHelperObjNormEarly(t->right, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit, didEarly);
+            findMinNormHelperObjNormEarly(t->right, x, bestObj, bestNorm, minBounds, xNorm, maxLoads, earlyExit, didEarly, count);
       }
       minBounds[dim] = oldMin;
     }

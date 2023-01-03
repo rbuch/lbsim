@@ -100,10 +100,12 @@ public:
     for (; objsIter != objs.end(); objsIter++)
     {
       bool didEarly = false;
+      int count = 0;
       auto proc =
-          *(T::findMinNormObjNormEarly(tree, *objsIter, maxLoads, THRESH, didEarly));
-      if (didEarly)
-	  std::cout << std::distance(objs.begin(), objsIter) << std::endl;
+          *(T::findMinNormObjNormEarly(tree, *objsIter, maxLoads, THRESH, didEarly, count));
+      std::cout << std::distance(objs.begin(), objsIter) << (didEarly ? " 1 " : " 0 ")
+                << count << std::endl;
+
       tree = T::remove(tree, proc);
       solution.assign(*objsIter, proc);
       updateMax(maxLoads, proc);
