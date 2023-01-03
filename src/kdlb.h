@@ -68,7 +68,7 @@ public:
   }
 };
 
-  template <typename O, typename P, typename S, typename T>
+template <typename O, typename P, typename S, typename T, int THRESH=1>
 class BaseKdLBObjNormEarly : public Strategy<O, P, S>
 {
   private:
@@ -99,7 +99,7 @@ public:
 
     for (; objsIter != objs.end(); objsIter++)
     {
-      auto proc = *(T::findMinNormObjNormEarly(tree, *objsIter, maxLoads));
+      auto proc = *(T::findMinNormObjNormEarly(tree, *objsIter, maxLoads, THRESH));
       tree = T::remove(tree, proc);
       solution.assign(*objsIter, proc);
       updateMax(maxLoads, proc);
@@ -196,12 +196,12 @@ public:
   };
 };
 
-template <int Exp>
+template <int Exp, int THRESH=1>
 class RKdExpLBObjNormEarly
 {
 public:
   template <typename O, typename P, typename S>
-  class RKdLB : public BaseKdLBObjNormEarly<O, P, S, RKDNode<P, Exp>>
+  class RKdLB : public BaseKdLBObjNormEarly<O, P, S, RKDNode<P, Exp>, THRESH>
   {
   };
 };

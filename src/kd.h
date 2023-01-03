@@ -847,11 +847,10 @@ public:
   }
 
   template <typename T>
-  static Elem* findMinNormObjNormEarly(rkdt t, const T& x, const std::array<KDFloatType, N>& maxLoads)
+  static Elem* findMinNormObjNormEarly(rkdt t, const T& x, const std::array<KDFloatType, N>& maxLoads, int earlyExit)
   {
     std::array<KDFloatType, N> mins = {0};
     KDFloatType bestNorm = std::numeric_limits<KDFloatType>::max();
-    int earlyExit = 5;
     return findMinNormHelperObjNormEarly(t, x, nullptr, bestNorm, mins, base::calcNorm(x), maxLoads, earlyExit);
   }
 
